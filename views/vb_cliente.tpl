@@ -27,59 +27,94 @@ $(document).ready(function(e) {
 		{
 			var rebaja = '';
 			
-			$.prompt("Acepta dejar sus repuestos en Apple y obtener el descuento informado en su contrato de reparaci&oacute;n?", { 
-								
-									buttons : { 'SI' : 1, 'NO' : 2, 'Cancelar' : 3 },  
-								 
-									submit: function(e,v,m,f) 
-									{ 
-										
-										if(v == 1)
-											rebaja = 1;
-										else if(v == 2)
-											rebaja = 0;
-										else
-										{
-											rebaja = 3;
-											$.prompt.close();
-										}
-										
-										if((rebaja == 1) || (rebaja == 0))
-										{
-										
-											loading();
+			if($('#hay_core').val() == '1')
+			{
+			
+				$.prompt("Acepta dejar sus repuestos en Apple y obtener el descuento informado en su contrato de reparaci&oacute;n?", { 
+									
+										buttons : { 'SI' : 1, 'NO' : 2, 'Cancelar' : 3 },  
+									 
+										submit: function(e,v,m,f) 
+										{ 
 											
-											$.post('./include/vb_cliente.php', { accion: 'acepta', i: $('#i').val(), descuento: rebaja  }, function(data)
+											if(v == 1)
+												rebaja = 1;
+											else if(v == 2)
+												rebaja = 0;
+											else
 											{
-												loadingOff();
+												rebaja = 3;
+												$.prompt.close();
+											}
+											
+											if((rebaja == 1) || (rebaja == 0))
+											{
+											
+												loading();
 												
-												if(data == "OK")
+												$.post('./include/vb_cliente.php', { accion: 'acepta', i: $('#i').val(), descuento: rebaja  }, function(data)
 												{
-													$.prompt("Ha aceptado el presupuesto. <br> Lo mantendremos informado sobre el estado de su contrato", 
-																{ 
-																	submit: function(e,v,m,f) 
+													loadingOff();
+													
+													if(data == "OK")
+													{
+														$.prompt("Ha aceptado el presupuesto. <br> Lo mantendremos informado sobre el estado de su contrato", 
 																	{ 
-																		window.location = 'http://www.reifstore.cl'; 
-																	} 
-																});		
-												}
-												else if(data == "CORREO")
-												{
-													$.prompt("Ha aceptado el presupuesto, pero no hemos podido enviar el correo informando al t&eacute;cnico.<br>Sin embargo, &eacute;l ser&aacute; notificado de manera interna. <br><br> Lo mantendremos informado sobre el estado de su contrato", 
-																{ 
-																	submit: function(e,v,m,f) 
+																		submit: function(e,v,m,f) 
+																		{ 
+																			window.location = 'http://www.reifstore.cl'; 
+																		} 
+																	});		
+													}
+													else if(data == "CORREO")
+													{
+														$.prompt("Ha aceptado el presupuesto, pero no hemos podido enviar el correo informando al t&eacute;cnico.<br>Sin embargo, &eacute;l ser&aacute; notificado de manera interna. <br><br> Lo mantendremos informado sobre el estado de su contrato", 
 																	{ 
-																		window.location = 'http://www.reifstore.cl'; 
-																	} 
-																});		
-												}
-											});
-										}
-										
-									} 
-								});		
+																		submit: function(e,v,m,f) 
+																		{ 
+																			window.location = 'http://www.reifstore.cl'; 
+																		} 
+																	});		
+													}
+												});
+											}
+											
+										} 
+									});		
 			
-			
+			}
+			else
+			{
+				
+				rebaja = 0;	
+				loading();
+												
+				$.post('./include/vb_cliente.php', { accion: 'acepta', i: $('#i').val(), descuento: rebaja  }, function(data)
+				{
+					loadingOff();
+					
+					if(data == "OK")
+					{
+						$.prompt("Ha aceptado el presupuesto. <br> Lo mantendremos informado sobre el estado de su contrato", 
+									{ 
+										submit: function(e,v,m,f) 
+										{ 
+											window.location = 'http://www.reifstore.cl'; 
+										} 
+									});		
+					}
+					else if(data == "CORREO")
+					{
+						$.prompt("Ha aceptado el presupuesto, pero no hemos podido enviar el correo informando al t&eacute;cnico.<br>Sin embargo, &eacute;l ser&aacute; notificado de manera interna. <br><br> Lo mantendremos informado sobre el estado de su contrato", 
+									{ 
+										submit: function(e,v,m,f) 
+										{ 
+											window.location = 'http://www.reifstore.cl'; 
+										} 
+									});		
+					}
+				});
+			}
 			
 			
 			/*if($('#rebaja_apple').prop('checked'))
@@ -129,7 +164,7 @@ $(document).ready(function(e) {
 															}
 															else if(data == "CORREO")
 															{
-																$.prompt("Ha aceptado el presupuesto, pero no hemos podido enviar el correo informando al t&eacute;cnico.<br>Sin embargo, &eacute;l ser&aacute; notificado de manera interna. <br><br> Lo mantendremos informado sobre el estado de su contrato", 
+																$.prompt("Ha rechazado el presupuesto, pero no hemos podido enviar el correo informando al t&eacute;cnico.<br>Sin embargo, &eacute;l ser&aacute; notificado de manera interna. <br><br> Lo mantendremos informado sobre el estado de su contrato", 
 																			{ 
 																				submit: function(e,v,m,f) 
 																				{ 
@@ -350,7 +385,34 @@ $(document).ready(function(e) {
                 	<fieldset class="ui-widget ui-corner-all" style="width:90%; margin:0 auto;" id="fieldset_repuestos">
                 {/if}
         		<legend class="legend_field">Repuestos</legend>
-                <div id="lista_repuestos" style="margin:0 auto; {if $info.aplica_garantia == 1} width:80%; {else} width:90%; {/if}">
+                <!--<div id="lista_repuestos" style="margin:0 auto; {if $info.aplica_garantia == 1} width:80%; {else} width:90%; {/if}">-->
+                
+                <div id="lista_repuestos" style="margin:0 auto; width:100%;">
+                	<!-- CORE -->
+                    {assign var="hay_core" value=0}
+                    {assign var="alinear" value="left"}
+                    
+                    {for $i=0 to count($info.repuestos) -1}
+                        {if $info.repuestos[$i]['core_repuesto'] != '$ 0'}
+                            {$hay_core = $hay_core+1}
+                        
+                        {/if}
+                    {/for}
+                	
+                    <!---------->
+                    
+                    {if $hay_core > 0}
+                    <input type="hidden" id="hay_core" name="hay_core" value="1" />
+                	<div style="width:85%; margin:0 auto; text-align:center;">
+                    	<br /> Uno o m&aacute;s de los repuestos que se encuentran dentro de su presupuesto que cuentan con una alternativa de descuento. Este descuento lo puede ver como &quot;Unit. Core&quot; y &quot;Total Core&quot; <br />
+                		Para poder optar a este descuento, debe presionar el bot&oacute;n &quot;Aceptar Presupuesto&quot; y luego presionar el bot&oacute;n &quot;SI&quot; en el pop-up que le aparecer&aacute;.
+                		<br /><br /><br />
+                    </div>
+                	{else}
+                    	<input type="hidden" id="hay_core" name="hay_core" value="0" />
+                    	{$alinear = 'center'}
+                    {/if}
+                    
                     <table class="nuevo_usuario">
                     <tr>
                         <td>
@@ -363,52 +425,109 @@ $(document).ready(function(e) {
                                 {if $info.aplica_garantia == 0}
                                     <th width="15%">Unitario</th>
                                     <th width="15%">Total</th>
+                                    <!-- CORE -->
+
+                                        {if $hay_core > 0}
+                                        	<th width="15%">Unit. Core</th>
+                                    		<th width="15%">Total Core</th>
+                                        {/if}
+                                   	<!----------->
                                 {/if}
                             </tr>
-                            {foreach name=outer item=contact from=$info.repuestos}
-                         		<tr>
-                                	{foreach key=key item=item from=$contact}
-                                    	{if ($key == cant_repuesto)}
-                                	    	<td align="center"><input type="text" value="{$item}" readonly="readonly" style="text-align:center; width:80px;" /></td>
-                                        {else if (($key == precio_repuesto) or ($key == total_repuesto)) and ($info.aplica_garantia == 1)}
-                                        	<td>&nbsp;</td>
-                                        {else if (($key == precio_repuesto) or ($key == total_repuesto)) and ($info.aplica_garantia == 0)}
-                                        	<td align="center"><input type="text" value="{$item}" readonly="readonly" style="text-align:right; width:80px;" /></td>
-                                        {else if ($key != tipo_repuesto)}
-                                        	<td align="center"><input type="text" value="{$item}" readonly="readonly" /></td>
-                                        {/if}
-                                	{/foreach}
+                            
+                            {assign var="sub_total_core" value=0}
+                            {assign var="iva_core" value=0}
+                            {assign var="total_core" value=0}
+                                
+                            {for $i=0 to count($info.repuestos) -1}
+                            	
+                                {if $info.repuestos[$i]['core_repuesto'] != '$ 0'}
+                            		{$sub_total_core 	= ($info.repuestos[$i]['total_core_limpio'] + $sub_total_core)}
+                                {else}
+                                	{$sub_total_core 	= ($info.repuestos[$i]['total_core_limpio'] + $sub_total_core) + $info.repuestos[$i]['total_repuesto_limpio']}
+                                {/if}
+
+                            	<tr>
+                               		<td align="center"><input type="text" value="{$info.repuestos[$i]['cod_repuesto']}" readonly="readonly" style="text-align:center; width:100px;" /></td>
+                                    <td align="center"><input type="text" value="{$info.repuestos[$i]['des_repuesto']}" readonly="readonly" style="text-align:center; width:200px;" title="{$info.repuestos[$i]['des_repuesto']}"   /></td>
+                                    <td align="center"><input type="text" value="{$info.repuestos[$i]['cant_repuesto']}" readonly="readonly" style="text-align:center; width:40px;" /></td>
+                                    {if $info.aplica_garantia == 0}
+                                    	<td align="center"><input type="text" value="{$info.repuestos[$i]['precio_repuesto']}" readonly="readonly" style="text-align:right; width:80px;" /></td>
+                                        <td align="center"><input type="text" value="{$info.repuestos[$i]['total_repuesto']}" readonly="readonly" style="text-align:right; width:80px;" /></td>
+                                        
+                                        <!-- CORE -->
+                                        {if $hay_core > 0}
+                                            {if $info.repuestos[$i]['core_repuesto'] != '$ 0'}
+                                                <td align="center"><input type="text" value="{$info.repuestos[$i]['core_repuesto']}" readonly="readonly" style="text-align:right; width:80px;" /></td>
+                                                <td align="center"><input type="text" value="{$info.repuestos[$i]['total_core']}" readonly="readonly" style="text-align:right; width:80px;" /></td>
+                                            {else}
+                                                <td align="center"><input type="text" value="$ 0" readonly="readonly" style="text-align:right; width:80px;" /></td>
+                                                <td align="center"><input type="text" value="$ 0" readonly="readonly" style="text-align:right; width:80px;" /></td>
+                                            {/if}
+                                     	{/if}
+                                        <!---------->
+                                    {/if}
                                 </tr>
-                            {/foreach}
+                            {/for}
+                            
+                            {$iva_core = $sub_total_core * 0.19}
+                            {$total_core = $sub_total_core + $iva_core}
             
                             </tbody>
                             <tfoot>
-                            <tr>
+                            <tr height="30px">
                             	{*if $info.aplica_garantia == 0*}
-                            		<th colspan="5">
+                            		<!--<th colspan="4">
                                 
                                 	<table class="nuevo_usuario">
                                     <tr height="30px">
-                                        <th colspan="4" align="right">Sub Total</th>
-                                        <td align="center" width="15%">
-                                            <input type="text" name="sub_total" id="sub_total" value="{$info.sub_total}" style="width:80px; text-align:right;" readonly="readonly">                            			</td>
-                                    </tr>
-                                    <tr height="30px">
-                                        <th colspan="4" align="right">Iva</th>
-                                        <td align="center">
-                                            <input type="text" name="iva" id="iva" value="{$info.iva}" style="width:80px; text-align:right;" readonly="readonly">
-                                        </td>
-                                    </tr>
-                                    <tr height="30px">
-                                        <th colspan="4" align="right">Total a Pagar</th>
-                                        <td align="center">
-                                            <input type="text" name="total_pagar" id="total_pagar" value="{$info.total_pagar}" style="width:80px; text-align:right;" readonly="readonly">                           				</td>
-                                    </tr>
-                                    </table>
+                                    -->    
+                                <th colspan="4" align="right">Sub Total</th>
+                                <td align="{$alinear}" colspan="2">
+                                    <input type="text" name="sub_total" id="sub_total" value="{$info.sub_total}" style="width:80px; text-align:right;" readonly="readonly"></td>
+                                    
+                                <!-- CORE -->
+                                {if $hay_core > 0}
+                                <td align="left">
+                                    <input type="text" name="sub_total_core" id="sub_total_core" value="$ {number_format($sub_total_core,0,'.','.')}" style="width:80px; text-align:right;" readonly="readonly">                          
+                                </td>                                        
+                                {/if}
+                                <!---------->
+                                            
+                           	</tr>
+                            <tr height="30px">
+                                <th colspan="4" align="right">Iva</th>
+                                <td align="{$alinear}" colspan="2">
+                                    <input type="text" name="iva" id="iva" value="{$info.iva}" style="width:80px; text-align:right;" readonly="readonly">
+                                </td>
+                                
+                                <!-- CORE -->
+                                {if $hay_core > 0}
+                                <td align="left">
+                                    <input type="text" name="iva_core" id="iva_core" value="$ {number_format($iva_core,0,'.','.')}" style="width:80px; text-align:right;" readonly="readonly">
+                                </td>
+                                {/if}
+                                <!---------->
+                            </tr>
+                            <tr height="30px">
+                                <th colspan="4" align="right">Total a Pagar</th>
+                                <td align="{$alinear}" colspan="2">
+                                    <input type="text" name="total_pagar" id="total_pagar" value="{$info.total_pagar}" style="width:80px; text-align:right;" readonly="readonly">                           		</td>
+                                    
+                                <!-- CORE -->
+                                {if $hay_core > 0}
+                                <td align="left">
+                                    <input type="text" name="total_pagar_core" id="total_pagar_core" value="$ {number_format($total_core,0,'.','.')}" style="width:80px; text-align:right;" readonly="readonly">                           		
+                              	</td>
+                                {/if}
+                                <!---------->
+                                    
+                            </tr>
+                            <!--        </table>
                              	</th>
-                              
+                            -->  
                               {*/if*}
-                          	</tr>
+                          	<!--</tr>-->
                             {*if $info.aplica_garantia == 1*}
                             <!--<tr height="30px">
                                         <th align="right" colspan="2">Total a Pagar</th>

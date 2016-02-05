@@ -32,6 +32,12 @@
             <br>Contratos de Reparaci&oacute;n
       	</a>
    	</td>
+    <td>
+    	<a href="#" id="repuestos" class="boton_panel">
+        	<img src="{$root_dir}images/repuestos.png" width="60" height="60" border="0">
+            <br>Gesti&oacute;n de Repuestos
+      	</a>
+   	</td>
     {/if}
     
     

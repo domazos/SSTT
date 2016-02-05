@@ -499,7 +499,7 @@ class Contratos
 	}
 	
 	
-	public function guardaDiagnostico($accion, $id_contrato, $garantia_diagnostico, $fecha_inicio_d, $fecha_termino_d, $respuesta_tipo, $observacion_otra_respuesta, $diagnostico_cliente, $diagnostico_interno, $num_gsx, $fecha_ppto, $estado_ppto, $observaciones_ppto, $repuestos, $sub_total_limpio, $iva_limpio, $total_final_limpio, $total_pagar_limpio, $id_diagnostico, $id_presupuesto, $id_cliente, $tipo_guardar)
+	public function guardaDiagnostico($accion, $id_contrato, $garantia_diagnostico, $fecha_inicio_d, $fecha_termino_d, $respuesta_tipo, $observacion_otra_respuesta, $diagnostico_cliente, $diagnostico_interno, $num_gsx, $fecha_ppto, $estado_ppto, $observaciones_ppto, $repuestos, $sub_total_limpio, $iva_limpio, $total_final_limpio, $total_pagar_limpio, $id_diagnostico, $id_presupuesto, $id_cliente, $tipo_guardar, $sub_total_core_limpio, $iva_core_limpio, $total_core_final_limpio, $total_core_pagar_limpio)
 	{
 		$bd 	= new DB;	
 		if($accion == 'guardar_diagnostico')
@@ -524,7 +524,7 @@ class Contratos
 						
 			$sql_ppto	=	"
 								INSERT INTO presupuesto ( 	id_estado_ppto, id_contrato, fecha_presupuesto, observaciones, fecha_confirmacion, sub_total, iva, 
-															total, total_pagar )
+															total, total_pagar, sub_total_c, iva_c, total_c, total_pagar_c )
 								VALUES
 										(
 											".$estado_ppto.",
@@ -535,12 +535,14 @@ class Contratos
 											".$sub_total_limpio.",
 											".$iva_limpio.",
 											".$total_final_limpio.",
-											".$total_pagar_limpio."
+											".$total_pagar_limpio.",
+											".$sub_total_core_limpio.",
+											".$iva_core_limpio.",
+											".$total_core_final_limpio.",
+											".$total_core_pagar_limpio."
 										)
 							";
 
-			$sql_cont	=	"UPDATE contratos_reparacion SET id_estado = 2 WHERE id_contrato = ".$id_contrato;
-			
 			
 			$bd->beginTransaction();
 			
@@ -562,10 +564,10 @@ class Contratos
 					{
 						$sql_rep = "
 										INSERT INTO presupuesto_repuestos ( id_presupuesto, id_repuesto, tipo_repuesto, cod_repuesto, des_repuesto, cant_repuesto, 
-																			precio_repuesto )
+																			precio_repuesto, precio_core )
 										VALUES ( 	".$id_ppto.", ".$repuestos[$i]['id_repuesto'].", ".$repuestos[$i]['tipo_repuesto'].", '".$repuestos[$i]['cod_repuesto']."', 
 													'".$repuestos[$i]['des_repuesto']."', ".$repuestos[$i]['cant_repuesto'].", 
-													".$repuestos[$i]['prec_repuesto']."
+													".$repuestos[$i]['prec_repuesto'].", ".$repuestos[$i]['core_repuesto']."
 												)
 									";
 						if($bd->query($sql_rep))
@@ -614,6 +616,8 @@ class Contratos
 								
 								if($tipo_guardar == 2)
 								{
+									$sql_cont	=	"UPDATE contratos_reparacion SET id_estado = 2 WHERE id_contrato = ".$id_contrato;
+									
 									if($this->enviarCorreo($para_c, $cc_c = NULL, $nombre_desde_c, $asunto_c, $cuerpo_c, $adjunto = NULL))
 										$correo_c 	= "OK";
 									else
@@ -621,14 +625,19 @@ class Contratos
 								}
 								else
 								{
+									$sql_cont	=	"UPDATE contratos_reparacion SET id_estado = 1 WHERE id_contrato = ".$id_contrato;
 									$correo_c = "ENV";	
 								}
 							}
 							else
 								$correo_c = "NO";
 							
+							
+							
+							
 							if($correo_c == "OK")
 							{
+								
 								if($bd->query($sql_cont))
 								{
 									mysql_query("COMMIT") or die ("Error commit: ".mysql_error());
@@ -690,7 +699,9 @@ class Contratos
 						}
 						else
 						{
-							# Si aplica garantía, no se envía correo para VB Cliente
+							# Si aplica garantía, no se envía correo para VB Cliente y el contrato queda en estado "EN ESPERA DE REPUESTOS"
+							
+							$sql_cont	=	"UPDATE contratos_reparacion SET id_estado = 5 WHERE id_contrato = ".$id_contrato;
 							
 							if($bd->query($sql_cont))
 							{
@@ -702,7 +713,13 @@ class Contratos
 								
 								$this->seguimientoContrato($id_contrato, $userid, $estado_ppto);
 								
-								echo "OK|".$id_contrato;
+								if($tipo_guardar == 2)
+								{
+									# Si presionan "Guardar y Enviar" cuando aplica garantía envío otro mensaje de respuesta para mostrar al tecnico
+									echo "CORREOGAR|".$id_contrato;
+								}
+								else
+									echo "OK|".$id_contrato;
 							}
 							else
 							{
@@ -1125,7 +1142,9 @@ class Contratos
 					LEFT JOIN	presupuesto p ON p.id_contrato = c.id_contrato
 					LEFT JOIN	respuestas_tipo r ON r.id_respuesta = d.id_respuesta 
 					LEFT JOIN	estados_contrato e ON e.id_estado = c.id_estado
-					WHERE 		c.id_contrato = ".$id_contrato." AND	p.id_estado_ppto != 4";
+					WHERE 		c.id_contrato = ".$id_contrato." AND	p.id_estado_ppto != 4 AND d.id_diagnostico = (SELECT dd.id_diagnostico FROM diagnostico dd WHERE dd.id_contrato = ".$id_contrato." AND dd.fecha_inicio = (SELECT MAX(fecha_inicio) FROM diagnostico WHERE id_contrato = ".$id_contrato.")) AND p.id_presupuesto = (SELECT pp.id_presupuesto FROM presupuesto pp WHERE pp.id_contrato = ".$id_contrato." AND pp.fecha_presupuesto = (SELECT MAX(fecha_presupuesto) FROM presupuesto WHERE id_contrato = ".$id_contrato."))";
+					
+			
 
 		if(($bd->query($sql)) and ($bd->resultCount() > 0))
 		{
@@ -1178,10 +1197,10 @@ class Contratos
 			else
 				$img_table_2 = '';
 			
-			$sql_repuestos = 	"	SELECT 		pr.tipo_repuesto, pr.cod_repuesto, pr.des_repuesto, pr.cant_repuesto, pr.precio_repuesto
+			$sql_repuestos = 	"	SELECT 		pr.tipo_repuesto, pr.cod_repuesto, pr.des_repuesto, pr.cant_repuesto, pr.precio_repuesto, pr.precio_core 
 									FROM		presupuesto_repuestos pr 
 									LEFT JOIN	presupuesto p ON p.id_presupuesto = pr.id_presupuesto 
-									WHERE		p.id_contrato = ".$id_contrato." AND	p.id_estado_ppto != 4";
+									WHERE		p.id_contrato = ".$id_contrato." AND	p.id_estado_ppto != 4 AND p.id_presupuesto = (SELECT pp.id_presupuesto FROM presupuesto pp WHERE pp.id_contrato = ".$id_contrato." AND pp.fecha_presupuesto = (SELECT MAX(fecha_presupuesto) FROM presupuesto WHERE id_contrato = ".$id_contrato."))";
 							
 			if (($bd->query($sql_repuestos)) and ($bd->resultCount() > 0))
 			{
@@ -1191,13 +1210,22 @@ class Contratos
 				{
 					$rep_p = $bd->fetchObj();	
 					
+					// Precio total por cada repuesto ingresado
+					$total_repuesto_core	= (int) (((($rep_p->precio_repuesto * 0.7) - $rep_p->precio_core) / 0.7) * $rep_p->cant_repuesto);
+					
 					$repuestos[] = array(
 											"tipo_repuesto"		=> $rep_p->tipo_repuesto,
 											"cod_repuesto"		=> $rep_p->cod_repuesto,
 											"des_repuesto"		=> $rep_p->des_repuesto,
 											"cant_repuesto"		=> $rep_p->cant_repuesto,
 											"precio_repuesto"	=> "$ ".number_format($rep_p->precio_repuesto, 0, '.', '.'),
-											"total_repuesto"	=> "$ ".number_format(($rep_p->cant_repuesto * $rep_p->precio_repuesto), 0, '.', '.')
+											"core_repuesto"		=> "$ ".number_format($rep_p->precio_core, 0, '.', '.'),
+											"total_repuesto"	=> "$ ".number_format(($rep_p->cant_repuesto * $rep_p->precio_repuesto), 0, '.', '.'),
+											"total_repuesto_limpio"	=> ($rep_p->cant_repuesto * $rep_p->precio_repuesto),
+											#"total_core"		=> "$ ".number_format(($rep_p->cant_repuesto * $rep_p->precio_core), 0, '.', '.'),
+											#"total_core_limpio"	=> ($rep_p->cant_repuesto * $rep_p->precio_core)
+											"total_core"		=> "$ ".number_format($total_repuesto_core, 0, '.', '.'),
+											"total_core_limpio"	=> $total_repuesto_core
 										);
 				}
 				
@@ -1406,7 +1434,7 @@ class Contratos
 				session_start();
 				extract($_SESSION);
 						
-				if($aplica_g == 1)
+				/*if($aplica_g == 1)
 				{
 					$sql_ppto = "SELECT * FROM presupuesto WHERE id_contrato = ".$id_contrato." AND id_estado_ppto != 4";
 			
@@ -1418,7 +1446,7 @@ class Contratos
 						
 						$this->generarOC($id_contrato, $ppto->id_presupuesto, $userid, date('Y-m-d H:i:s'), 'GENERADA AUTOMATICAMENTE POR SISTEMA SSTT (CONTRATO NUM'.$id_contrato.')', $ppto->sub_total, $ppto->iva, $ppto->total);
 					}		
-				}
+				}*/
 				
 				$this->seguimientoContrato($id_contrato, $userid, 3);
 				
@@ -1497,7 +1525,7 @@ class Contratos
 						$asunto			= "Rechazo Presupuesto Contrato de Trabajo";
 						
 						$cuerpo			= "Estimado(a) ".utf8_encode($tecnico->nombre).": ";
-						$cuerpo 		.= "<br><br>Junto con saludar, informamos que cliente ha <strong>rechazado</strong> el presupuesto asociado al contrato de reparacion N&deg;: ".$id_contrato.".";
+						$cuerpo 		.= "<br><br>Junto con saludar, informamos que cliente ha <strong>RECHAZADO</strong> el presupuesto asociado al contrato de reparacion N&deg;: ".$id_contrato.".";
 						
 						
 						$sql_resp_rechazo = "SELECT * FROM respuestas_tipo_rechazo WHERE id_respuesta = ".$id_respuesta;
@@ -1543,11 +1571,11 @@ class Contratos
 	}
 	
 	
-	public function guardaPago($id_contrato, $boleta_contrato)
+	public function guardaPago($id_contrato, $boleta_contrato, $id_presupuesto)
 	{
 		$bd 	= new DB;
 		
-		$sql 	= "UPDATE presupuesto SET num_boleta = ".$boleta_contrato." WHERE id_contrato = ".$id_contrato;
+		$sql 	= "UPDATE presupuesto SET num_boleta = ".$boleta_contrato." WHERE id_contrato = ".$id_contrato." AND id_presupuesto = ".$id_presupuesto;
 		
 		#mysql_query("START TRANSACTION;") or die ("Error Start_Transaction: ".mysql_error());	
 		
@@ -1557,7 +1585,7 @@ class Contratos
 		{
 			mysql_query("COMMIT") or die ("Error commit: ".mysql_error());
 			
-			$sql_ppto = "SELECT * FROM presupuesto WHERE id_contrato = ".$id_contrato;
+			$sql_ppto = "SELECT * FROM presupuesto WHERE id_contrato = ".$id_contrato." AND id_presupuesto = ".$id_presupuesto;
 			
 			if(($bd->query($sql_ppto)) and ($bd->resultCount() > 0))
 			{
@@ -1597,9 +1625,9 @@ class Contratos
 											".$id_usuario.",
 											'".$fecha_creacion."',
 											'".$observaciones."',
-											".$sub_total.",
-											".$iva.",
-											".$total."	
+											".(int)($sub_total * 0.7).",
+											".(int)($iva * 0.7).",
+											".(int)($total * 0.7)."	
 										)
 							";
 							
@@ -1634,7 +1662,7 @@ class Contratos
 													'".$rep->cod_repuesto."',
 													'".$rep->des_repuesto."',
 													".$rep->cant_repuesto.",
-													".$rep->precio_repuesto."	
+													".(int)($rep->precio_repuesto * 0.7)."	
 												)
 											";
 					#echo $sql_detalle_oc,die;
@@ -1647,9 +1675,9 @@ class Contratos
 				#echo $detalle." - ".$cuantos_repuestos,die;
 				if($detalle == $cuantos_repuestos)
 				{
-					$sql_upd1 	= 	"UPDATE contratos_reparacion SET id_estado = 9 WHERE id_contrato = ".$id_contrato;
+					$sql_upd1 	= 	"UPDATE contratos_reparacion SET id_estado = 5 WHERE id_contrato = ".$id_contrato;
 		
-					$sql_upd2	= 	"UPDATE presupuesto SET id_estado_ppto = 7, orden_compra = ".$id_oc." WHERE id_contrato = ".$id_contrato." AND id_estado_ppto != 4";
+					$sql_upd2	= 	"UPDATE presupuesto SET id_estado_ppto = 6, orden_compra = ".$id_oc." WHERE id_contrato = ".$id_contrato." AND id_estado_ppto != 4";
 					
 					
 					if(($bd->query($sql_upd1)) and ($bd->query($sql_upd2)))
@@ -1947,6 +1975,94 @@ class Contratos
 					
 					}
 				}
+				
+				session_name('sstt');
+				session_start();
+				extract($_SESSION);
+									
+				$this->seguimientoContrato($id_contrato, $userid, 7); 
+				
+				return true;
+			}
+			else
+				return false;
+
+		}
+		else
+			return false;
+			
+	}
+	
+	
+	public function cancelarContrato($id_contrato, $id_respuesta, $otra_respuesta = "")
+	{
+		$bd = new DB;
+		
+		#$sql = "UPDATE contratos_reparacion SET observacion_final = '".$observacion_final."', fecha_observacion_final = '".date('Y-m-d H:i:s')."' WHERE id_contrato = ".$id_contrato;
+		
+		# Se modifica estructura de finalización de contrato. Según requerimiento, se elimina observación final y se deja select con respuestas tipo
+		
+		$sql = "UPDATE contratos_reparacion SET id_respuesta = ".$id_respuesta.", fecha_respuesta_final = '".date('Y-m-d H:i:s')."', otra_respuesta = '".htmlentities($otra_respuesta)."' WHERE id_contrato = ".$id_contrato;
+		
+		
+		
+		if($bd->query($sql))	
+		{
+			$sql_upd1 	= 	"UPDATE contratos_reparacion SET id_estado = 10 WHERE id_contrato = ".$id_contrato;
+			
+			$sql_upd2 	= 	"UPDATE presupuesto SET id_estado_ppto = 9 WHERE id_contrato = ".$id_contrato;
+			
+			if(($bd->query($sql_upd1)) and ($bd->query($sql_upd2)))
+			{
+				$sql_cliente = "SELECT 	c.id_cliente, d.fecha_inicio
+								FROM 	contratos_reparacion c 
+								JOIN	diagnostico d ON d.id_contrato = c.id_contrato
+								WHERE 	c.id_contrato = ".$id_contrato;
+	
+				if(($bd->query($sql_cliente)) and ($bd->resultCount() > 0))
+				{
+					$cliente = $bd->fetchObj();
+					$id_cliente = $cliente->id_cliente;
+				}
+				else
+				{
+					$cliente = NULL;
+					$id_cliente = 0;
+				}
+				
+				if($id_cliente != 0)
+				{
+					
+					$sql_usr = "SELECT nombre, correo FROM clientes WHERE id_cliente = ".$id_cliente;
+				
+					if(($bd->query($sql_usr)) and ($bd->resultCount() > 0))
+					{
+						$cl = $bd->fetchObj();
+						
+						$para 			= array($cl->correo);
+						$nombre_desde	= "Servicio Tecnico Reifschneider";
+						$asunto_c		= "Finalizacion Contrato de Trabajo ".$id_contrato;
+											
+						$cuerpo_c		= "Estimado(a) ".utf8_encode($cl->nombre).": ";
+						$cuerpo_c 		.= "<br><br>Junto con saludar, informamos a usted que con fecha <strong>".date('d-m-Y')."</strong> se ha finalizado su contrato de reparacion N&deg;: ".$id_contrato.".";
+						$cuerpo_c		.= "<br>Ante cualquier consulta, estaremos atentos a su contacto.";
+						$cuerpo_c 		.= "<br><br><br>** Favor no responder, este es un mail generado automaticamente **";
+						$cuerpo_c		.= "<br>** Los acentos fueron eliminados automaticamente para prevenir problemas de incompatibilidad con algunos clientes de correo **";
+						
+						
+						if($this->enviarCorreo($para, $cc = NULL, $nombre_desde, $asunto_c, $cuerpo_c, $adjunto = NULL))
+							$correo 	= "OK";
+						else
+							$correo		= "NO";
+					
+					}
+				}
+				session_name('sstt');
+				session_start();
+				extract($_SESSION);
+									
+				$this->seguimientoContrato($id_contrato, $userid, 10); 
+				
 				return true;
 			}
 			else
@@ -1981,10 +2097,10 @@ class Contratos
 				{
 					$tecnico = $bd->fetchObj();
 					#$sql_upd1 	= 	"UPDATE contratos_reparacion SET id_estado = 6 WHERE id_contrato = ".$id_contrato;
-					$sql_upd1 	= 	"UPDATE contratos_reparacion SET id_estado = 9 WHERE id_contrato = ".$id_contrato;
+					#$sql_upd1 	= 	"UPDATE contratos_reparacion SET id_estado = 9 WHERE id_contrato = ".$id_contrato;
 		
-					if($bd->query($sql_upd1))
-					{
+					#if($bd->query($sql_upd1))
+					#{
 					
 						$para 			= array($tecnico->correo);
 						$nombre_desde	= "Servicio Tecnico Reifschneider";
@@ -2001,9 +2117,9 @@ class Contratos
 							$correo		= "NO";
 							
 						return true;
-					}
-					else
-						return false;
+					#}
+					#else
+					#	return false;
 				}
 				else
 					return false;

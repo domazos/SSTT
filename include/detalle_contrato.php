@@ -12,7 +12,9 @@ $id_contrato = trim(strip_tags($_POST['id_contrato']));
 		$sql_ppto = "SELECT id_presupuesto FROM presupuesto WHERE id_contrato = ".$id_contrato;
 
 		if(($bd->query($sql_ppto)) and ($bd->resultCount() > 1))
-			$and_sql = 'AND p.id_estado_ppto != 4 AND d.fecha_inicio = (SELECT MAX(dd.fecha_inicio) FROM diagnostico dd WHERE dd.id_contrato = '.$id_contrato.')';
+			#$and_sql = 'AND p.id_estado_ppto != 4 AND d.fecha_inicio = (SELECT MAX(dd.fecha_inicio) FROM diagnostico dd WHERE dd.id_contrato = '.$id_contrato.')';
+			$and_sql = "AND p.id_estado_ppto != 4 AND d.id_diagnostico = (SELECT dd.id_diagnostico FROM diagnostico dd WHERE dd.id_contrato = ".$id_contrato." AND dd.fecha_inicio = (SELECT MAX(fecha_inicio) FROM diagnostico WHERE id_contrato = ".$id_contrato.")) AND p.id_presupuesto = (SELECT pp.id_presupuesto FROM presupuesto pp WHERE pp.id_contrato = ".$id_contrato." AND pp.fecha_presupuesto = (SELECT MAX(fecha_presupuesto) FROM presupuesto WHERE id_contrato = ".$id_contrato."))";
+			
 		else
 			$and_sql = '';
 			
@@ -29,7 +31,8 @@ $id_contrato = trim(strip_tags($_POST['id_contrato']));
 						u.nombre as tecnico_asignado, u.id_usuario, e.descripcion as estado_contrato, p.num_boleta as boleta_ppto, 
 						c.id_estado as id_estado_contrato, c.observacion_final, 
 						DATE_FORMAT(c.fecha_respuesta_final, '%d-%m-%Y') as fecha_respuesta_final, c.id_respuesta as id_respuesta_fin, 
-						c.otra_respuesta as otra_respuesta_fin, p.id_respuesta_rechazo, rt.respuesta as respuesta_rechazo 
+						c.otra_respuesta as otra_respuesta_fin, p.id_respuesta_rechazo, rt.respuesta as respuesta_rechazo,
+						p.sub_total_c, p.iva_c, p.total_c, p.total_pagar_c, p.rebaja_apple 
 				FROM 	contratos_reparacion c 
 				LEFT JOIN	clientes cl ON c.id_cliente = cl.id_cliente
 				LEFT JOIN	diagnostico d ON d.id_contrato = c.id_contrato
@@ -38,7 +41,7 @@ $id_contrato = trim(strip_tags($_POST['id_contrato']));
 				LEFT JOIN	estados_contrato e ON e.id_estado = c.id_estado 
 				LEFT JOIN	respuestas_tipo_rechazo rt ON rt.id_respuesta = p.id_respuesta_rechazo
 				WHERE 	c.id_contrato = ".$id_contrato." ".$and_sql;
-#echo $sql,die;
+
 
 	if (($bd->query($sql)) and ($bd->resultCount() > 0))
 	{
@@ -46,7 +49,7 @@ $id_contrato = trim(strip_tags($_POST['id_contrato']));
 		
 		
 		$sql_repuestos = "	
-							SELECT 	p.id, p.id_repuesto, p.cod_repuesto, p.des_repuesto, p.precio_repuesto, p.cant_repuesto, p.tipo_repuesto 
+							SELECT 	p.id, p.id_repuesto, p.cod_repuesto, p.des_repuesto, p.precio_repuesto, p.cant_repuesto, p.tipo_repuesto, p.precio_core 
 							FROM 	presupuesto_repuestos p 
 							WHERE 	p.id_presupuesto = ".$row->id_presupuesto;
 		
@@ -58,6 +61,10 @@ $id_contrato = trim(strip_tags($_POST['id_contrato']));
 			{
 				$rep = $bd->fetchObj();	
 				
+				
+				// Precio total por cada repuesto ingresado
+				$total_repuesto_core	= (int) (((($rep->precio_repuesto * 0.7) - $rep->precio_core) / 0.7) * $rep->cant_repuesto);
+				
 				$repuestos[]	= array(
 														"id"				=> $rep->id,
 														"id_repuesto" 		=> $rep->id_repuesto,
@@ -66,7 +73,10 @@ $id_contrato = trim(strip_tags($_POST['id_contrato']));
 														"des_repuesto"		=> $rep->des_repuesto,
 														"prec_repuesto"		=> $rep->precio_repuesto,
 														"cant_repuesto"		=> $rep->cant_repuesto,
-														"total_repuesto"	=> ($rep->cant_repuesto * $rep->precio_repuesto)
+														"total_repuesto"	=> ($rep->cant_repuesto * $rep->precio_repuesto),
+														"core_repuesto"		=> $rep->precio_core,
+														#"total_core"		=> ($rep->cant_repuesto * $rep->precio_core)
+														"total_core"		=> $total_repuesto_core
 													);
 			}
 				
@@ -147,7 +157,12 @@ $id_contrato = trim(strip_tags($_POST['id_contrato']));
 								'fecha_res_final'	=> html_entity_decode(stripslashes($row->fecha_respuesta_final)),
 								'resultado'			=> html_entity_decode(stripslashes('OK')),
 								'respuesta_rechazo'	=> html_entity_decode(stripslashes($row->respuesta_rechazo)),
-								'id_respuesta_rechazo'	=> html_entity_decode(stripslashes($row->id_respuesta_rechazo))
+								'id_respuesta_rechazo'	=> html_entity_decode(stripslashes($row->id_respuesta_rechazo)),
+								'rebaja_apple'		=> html_entity_decode(stripslashes($row->rebaja_apple)),
+								'sub_total_c'		=> html_entity_decode(stripslashes($row->sub_total_c)),
+								'iva_c'				=> html_entity_decode(stripslashes($row->iva_c)),
+								'total_c'			=> html_entity_decode(stripslashes($row->total_c)),
+								'total_pagar_c'		=> html_entity_decode(stripslashes($row->total_pagar_c))
 							);
 	
 		

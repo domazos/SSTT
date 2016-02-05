@@ -46,7 +46,13 @@
                                	</span>
                                 {/if}
                                 
-                                {if (($contratos[$i]->id_diagnostico != 0) and ($contratos[$i]->id_estado != 4)) }
+                                {if ($contratos[$i]->id_estado == 4)}
+                                <span class="cancelar">
+                                	<a href="#" id="{$contratos[$i]->id_contrato}" class="cancelar_contrato" title="Cerrar Contrato">&nbsp;</a>
+                               	</span>
+                                {/if}
+                                
+                                {if (($contratos[$i]->id_diagnostico != 0) and ($contratos[$i]->id_estado != 4) and ($contratos[$i]->id_estado != 10)) }
                                 <span class="enviar_ppto">
                                 	<a href="#" id="{$contratos[$i]->id_contrato}" class="enviar_presupuesto" title="Enviar Diagn&oacute;stico y PPTO Contrato">&nbsp;</a>
                                	</span>
@@ -70,6 +76,13 @@
                                 	<a href="#" id="{$contratos[$i]->id_contrato}" class="finalizar_contrato" title="Finalizar Contrato">&nbsp;</a>
                                	</span>
                                 {/if}
+                                
+                                {if ($contratos[$i]->id_estado == 5)}
+                                <span class="reparar">
+                                	<a href="#" id="{$contratos[$i]->id_contrato}" class="reparar_contrato" title="Comenzar Reparaci&oacute;n Contrato">&nbsp;</a>
+                               	</span>
+                                {/if}
+                                
                             {/if}    
                         </td>
                         
@@ -568,44 +581,65 @@
                             </tr>
                             <tbody>
                             <tr class="tabla_no">
-                                <th width="25%">Cod. Repuesto <br><span class="comentario" style="position:relative;">Puedes buscar por C&oacute;digo o Nombre</span></th>
-                                <th width="25%">Descripci&oacute;n</th>
-                                <th width="15%">Cantidad</th>
+                                <th width="23%">Cod. Repuesto <br><span class="comentario" style="position:relative;">Puedes buscar por C&oacute;digo o Nombre</span></th>
+                                <th width="24%">Descripci&oacute;n</th>
+                                <th width="10%">Cantidad</th>
                                 <th width="15%">Unitario</th>
+                                <th width="15%">Core</th>
                                 <th width="15%">Total</th>
-                                <th width="3%">&nbsp;</th>
+                                <th width="15%">Total Core</th>
                             </tr>
                             </tbody>
                             <tfoot>
                             <tr class="tabla_no">
-                            	<th colspan="5">
+                            	<th colspan="7">
                                 	<table class="nuevo_usuario">
                                     <tr height="30px" class="tabla_no">
-                                        <th colspan="4" align="right">Sub Total</th>
+                                        <th colspan="5" align="right">Sub Total</th>
                                         <td align="center">
                                             <input type="text" name="sub_total" id="sub_total" value="0" style="width:80px; text-align:right;" readonly="readonly">
                                             <input type="hidden" name="sub_total_limpio" id="sub_total_limpio" value="0">
                                         </td>
+                                        
+                                        <td align="center">
+                                            <input type="text" name="sub_total_core" id="sub_total_core" value="0" style="width:80px; text-align:right;" readonly="readonly">
+                                            <input type="hidden" name="sub_total_core_limpio" id="sub_total_core_limpio" value="0">
+                                        </td>
                                     </tr>
                                     <tr height="30px" class="tabla_no">
-                                        <th colspan="4" align="right">Iva</th>
+                                        <th colspan="5" align="right">Iva</th>
                                         <td align="center">
                                             <input type="text" name="iva" id="iva" value="0" style="width:80px; text-align:right;" readonly="readonly">
                                             <input type="hidden" name="iva_limpio" id="iva_limpio" value="0">
                                         </td>
+                                        
+                                        <td align="center">
+                                            <input type="text" name="iva_core" id="iva_core" value="0" style="width:80px; text-align:right;" readonly="readonly">
+                                            <input type="hidden" name="iva_core_limpio" id="iva_core_limpio" value="0">
+                                        </td>
                                     </tr>
                                     <tr height="30px" class="tabla_no">
-                                        <th colspan="4" align="right">Total</th>
+                                        <th colspan="5" align="right">Total</th>
                                         <td align="center">
                                             <input type="text" name="total_final" id="total_final" value="0" style="width:80px; text-align:right;" readonly="readonly">
                                             <input type="hidden" name="total_final_limpio" id="total_final_limpio" value="0">
                                         </td>
+                                        
+                                        <td align="center">
+                                            <input type="text" name="total_core_final" id="total_core_final" value="0" style="width:80px; text-align:right;" readonly="readonly">
+                                            <input type="hidden" name="total_core_final_limpio" id="total_core_final_limpio" value="0">
+                                        </td>
                                     </tr>
                                     <tr height="30px" class="tabla_no">
-                                        <th colspan="4" align="right">Total a Pagar</th>
+                                        <th colspan="5" align="right">Total a Pagar</th>
                                         <td align="center">
                                             <input type="text" name="total_pagar" id="total_pagar" value="0" style="width:80px; text-align:right;" readonly="readonly">
                                             <input type="hidden" name="total_pagar_limpio" id="total_pagar_limpio" value="0">
+                                        </td>
+                                        
+                                        <td align="center">
+                                            <input type="text" name="total_core_pagar" id="total_core_pagar" value="0" style="width:80px; text-align:right;" readonly="readonly">
+                                            <input type="hidden" name="total_core_pagar_limpio" id="total_core_pagar_limpio" value="0">
                                         </td>
                                     </tr>
                                     </table>
@@ -629,7 +663,7 @@
 
 
 <!-- HTML Tabs para ver contrato -->
-<div id="dialog-contrato-ver" title="Detalle Contrato">
+<div id="dialog-contrato-ver" title="">
     <div id="tabs">
       <ul>
         <li><a href="#tabs-1">Cliente</a></li>
@@ -992,41 +1026,80 @@
                         <table class="nuevo_usuario" id="tabla_repuestos_ver">
                         <tbody>
                         <tr class="tabla_no">
-                            <th width="25%">Cod. Repuesto</th>
-                            <th width="25%">Descripci&oacute;n</th>
-                            <th width="15%">Cantidad</th>
+                            <th width="23%">Cod. Repuesto</th>
+                            <th width="24%">Descripci&oacute;n</th>
+                            <th width="10%">Cantidad</th>
                             <th width="15%">Unitario</th>
+                            <th width="15%">Core</th>
                             <th width="15%">Total</th>
+                            <th width="15%">Total Core</th>
                             
                         </tr>
                         </tbody>
                         <tfoot>
                         <tr class="tabla_no">
-                            <th colspan="5">
+                            <th colspan="7">
                                 <table class="nuevo_usuario">
                                 <tr height="30px" class="tabla_no">
-                                    <th colspan="4" align="right">Sub Total</th>
+                                    <th colspan="5" align="right">Sub Total</th>
                                     <td align="center">
                                         <input type="text" name="sub_total_ver" id="sub_total_ver" value="0" style="width:80px; text-align:right;" readonly="readonly">
                                     </td>
+                                    
+                                    <!-- SUB TOTAL CORE -->
+                                    
+                                    <td align="center">
+                                        <input type="text" name="sub_total_core_ver" id="sub_total_core_ver" value="0" style="width:80px; text-align:right;" readonly="readonly">
+                                    </td>
+                                    
+                                    <!---------------->
+                                    
+                                    
                                 </tr>
                                 <tr height="30px" class="tabla_no">
-                                    <th colspan="4" align="right">Iva</th>
+                                    <th colspan="5" align="right">Iva</th>
                                     <td align="center">
                                         <input type="text" name="iva_ver" id="iva_ver" value="0" style="width:80px; text-align:right;" readonly="readonly">
                                     </td>
+                                    
+                                    <!-- IVA CORE -->
+                                    
+                                    <td align="center">
+                                        <input type="text" name="iva_core_ver" id="iva_core_ver" value="0" style="width:80px; text-align:right;" readonly="readonly">
+                                    </td>
+                                    
+                                    <!---------------->
+                                    
                                 </tr>
                                 <tr height="30px" class="tabla_no">
-                                    <th colspan="4" align="right">Total</th>
+                                    <th colspan="5" align="right">Total</th>
                                     <td align="center">
                                         <input type="text" name="total_final_ver" id="total_final_ver" value="0" style="width:80px; text-align:right;" readonly="readonly">
                                     </td>
+                                    
+                                    <!-- TOTAL CORE -->
+                                    
+                                    <td align="center">
+                                        <input type="text" name="total_final_core_ver" id="total_final_core_ver" value="0" style="width:80px; text-align:right;" readonly="readonly">
+                                    </td>
+                                    
+                                    <!---------------->
+                                    
                                 </tr>
                                 <tr height="30px" class="tabla_no">
-                                    <th colspan="4" align="right">Total a Pagar</th>
+                                    <th colspan="5" align="right">Total a Pagar</th>
                                     <td align="center">
                                         <input type="text" name="total_pagar_ver" id="total_pagar_ver" value="0" style="width:80px; text-align:right;" readonly="readonly">
                                     </td>
+                                    
+                                    <!-- TOTAL PAGAR CORE -->
+                                    
+                                    <td align="center">
+                                        <input type="text" name="total_pagar_core_ver" id="total_pagar_core_ver" value="0" style="width:80px; text-align:right;" readonly="readonly">
+                                    </td>
+                                    
+                                    <!---------------->
+                                    
                                 </tr>
                                 </table>
                             </th>
@@ -1078,7 +1151,7 @@
 <!-- HTML para pagar contrato -->
 <div id="dialog-contrato-pagar" title="Pagar PPTO Contrato">
 	<form id="pagar_contrato_frm" name="pagar_contrato_frm" method="post" action="" class="ui-front">
-        
+        <input type="hidden" id="id_presupuesto_pagar" name="id_presupuesto_pagar" value="0"/>
         <table class="nuevo_usuario">
         <tr>
             <th width="50%">Contrato N&deg;</th>
@@ -1157,6 +1230,32 @@
         </table>
         
         <input type="submit" id="finalizar_contrato_btn" name="finalizar_contrato_btn" style="display:none;" />
+        
+  	</form>
+</div>
+<!---------------------------------->
+
+
+<!-- HTML para cancelar contrato -->
+<div id="dialog-contrato-cancelar" title="Cancelar Contrato">
+	<form id="cancelar_contrato_frm" name="cancelar_contrato_frm" method="post" action="" class="ui-front">
+        <input type="hidden" id="id_contrato_cancelar" name="id_contrato_cancelar" class="text ui-widget-content ui-corner-all" readonly="readonly" value="0" />
+        <table class="nuevo_usuario">
+        <tr>
+            <th width="50%">Selecciona una respuesta</th>
+            <td>
+            	<select id="respuesta_tipo_cancelar" name="respuesta_tipo_cancelar" style="width:auto;" required>
+                    {$respuesta_tipo}
+                </select>
+            </td>
+        </tr>
+        <tr id="otra_respuesta_cancelar_tr" style="display:none;">
+            <th>Detalle Respuesta</th>
+            <td><textarea id="observacion_otra_respuesta_cancelar" name="observacion_otra_respuesta_cancelar" cols="23" rows="2" class="text ui-widget-content ui-corner-all" ></textarea></td>
+        </tr>
+        </table>
+        
+        <input type="submit" id="cancelar_contrato_btn" name="cancelar_contrato_btn" style="display:none;" />
         
   	</form>
 </div>

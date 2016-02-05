@@ -34,10 +34,11 @@ class Front extends Smarty
 								_CSS_DIR_ . 'impromptu.css',
 								'//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css',
 								#_CSS_DIR_ . 'jquery-ui.css',
-								_ROOT_DIR_ . 'uploadify/uploadify.css',
+								#_ROOT_DIR_ . 'uploadify/uploadify.css',
 								_JS_DIR_ . 'tablesorter-master/css/theme.metro-dark.css',
 								_CSS_DIR_ . 'estilo.css',
-								_CSS_DIR_ . 'jquery-ui-timepicker-addon.css'
+								_CSS_DIR_ . 'jquery-ui-timepicker-addon.css',
+								_CSS_DIR_ . 'plupload.css'
 								
 
 		
@@ -64,9 +65,12 @@ class Front extends Smarty
 								_JS_DIR_ . 'jquery.Rut.js',
 								_JS_DIR_ . 'jquery-ui-timepicker-addon.js',
 								_JS_DIR_ . 'jquery-ui-sliderAccess.js',
-								_JS_DIR_ . 'plupload/js/plupload.full.min.js',
-								_ROOT_DIR_ . 'uploadify/swfobject.js',
-								_ROOT_DIR_ . 'uploadify/jquery.uploadify.v2.1.4.min.js',
+								#_JS_DIR_ . 'plupload/js/plupload.full.min.js',
+								#_ROOT_DIR_ . 'uploadify/swfobject.js',
+								#_ROOT_DIR_ . 'uploadify/jquery.uploadify.v2.1.4.min.js',
+								'//www.plupload.com/plupload/js/plupload.full.min.js',
+								'//www.plupload.com/plupload/js/jquery.ui.plupload/jquery.ui.plupload.min.js',
+								_JS_DIR_ . 'plupload/js/i18n/es.js'
 								
 
 							);
@@ -334,6 +338,7 @@ class Front extends Smarty
 											
 			case 'gestion_repuestos'	:
 											extract($_REQUEST);
+											extract($_SESSION);
 											
 											include("Repuestos.php");
 												
@@ -344,7 +349,24 @@ class Front extends Smarty
 											$smarty->assign('root_dir', _ROOT_DIR_);
 											$smarty->assign('repuestos', $repuestos->listarRepuestos());
 											$smarty->assign('cuantos_repuestos', $repuestos->cuantosRepuestos());
+											$smarty->assign('tipo_usuario', $tipoUser);
 											$smarty->display('gestion_repuestos.tpl');						
+											$this->displayFooter();
+												
+											break;
+											
+											
+			case 'carga_repuestos'	:
+											extract($_REQUEST);
+											
+											include("Repuestos.php");
+												
+											$repuestos = new Repuestos;
+											
+											$this->displayHeader();
+											$smarty->caching = false;
+											$smarty->assign('root_dir', _ROOT_DIR_);
+											$smarty->display('carga_repuestos.tpl');						
 											$this->displayFooter();
 												
 											break;

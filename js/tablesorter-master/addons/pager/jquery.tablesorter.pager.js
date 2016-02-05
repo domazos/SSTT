@@ -693,6 +693,7 @@
 		},
 
 		destroyPager = function(table, p){
+			alert("destroy");
 			showAllRows(table, p);
 			p.$container.hide(); // hide pager
 			table.config.appender = null; // remove pager appender function

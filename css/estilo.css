@@ -3,10 +3,10 @@
 
 /*estilo formulario*/
 #formulario {
-	width: 400px;
+	width: 75%;
 	text-align: center;
 	position: relative;
-	height:450px;
+
 }
 #formulario fieldset {
 	background: #ffffff;
@@ -15,9 +15,9 @@
 	-webkit-box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.4);
 	box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.4);
 	padding: 20px 30px;
-	width: 80%;
+	width: 87%;
 	
-	position: absolute;
+	position: relative;
 }
 /*Ocultamos todos menos el primer fieldset*/
 #formulario fieldset:not(:first-of-type) {
@@ -37,7 +37,7 @@
 /*buttons*/
 #formulario .action-button {
 	width: 100px;
-	background: #27AE60;
+	background: #000;
 	font-weight: bold;
 	color: white;
 	border: 0 none;
@@ -47,8 +47,8 @@
 	margin: 10px 5px;
 }
 #formulario .action-button:hover,#formulario .action-button:focus {
-	-webkit-box-shadow: 0 0 0 2px white, 0 0 0 3px #27AE60;
-	box-shadow: 0 0 0 2px white, 0 0 0 3px #27AE60;
+	-webkit-box-shadow: 0 0 0 2px white, 0 0 0 3px #000;
+	box-shadow: 0 0 0 2px white, 0 0 0 3px #000;
 }
 /*headings*/
 .fs-title {
@@ -71,10 +71,10 @@
 }
 #progreso li {
 	list-style-type: none;
-	color: white;
+	color: #000;
 	text-transform: uppercase;
 	font-size: 9px;
-	width: 33.33%;
+	width: 50%;
 	float: left;
 	position: relative;
 }

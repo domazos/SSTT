@@ -293,6 +293,41 @@ input[type=button], input[type=submit], input[type=reset] {
 	height:30px;
 }
 
+.cancelar a {
+	background-image:url(../images/cancelar.png);
+	text-decoration:none;
+	display: inline-block;
+	width:30px;
+	height:30px;
+	margin-left:3px;
+	
+}
+
+.cancelar a:hover {
+	background-image:url(../images/cancelar_2.png);
+	text-decoration:none;
+	width:30px;
+	height:30px;
+}
+
+.reparar a {
+	background-image:url(../images/reparar.png);
+	text-decoration:none;
+	display: inline-block;
+	width:30px;
+	height:30px;
+	margin-left:3px;
+	
+}
+
+.reparar a:hover {
+	background-image:url(../images/reparar_2.png);
+	text-decoration:none;
+	width:30px;
+	height:30px;
+}
+
+
 
 .enviar_ppto a {
 	background-image:url(../images/email.png);

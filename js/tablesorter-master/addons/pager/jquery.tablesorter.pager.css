@@ -31,7 +31,7 @@ td.tablesorter-pager {
 /*** css used when "updateArrows" option is true ***/
 /* the pager itself gets a disabled class when the number of rows is less than the size */
 .tablesorter-pager.disabled {
-	display: none;
+	display: block;
 }
 /* hide or fade out pager arrows when the first or last row is visible */
 .tablesorter-pager .disabled {

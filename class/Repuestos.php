@@ -8,7 +8,7 @@ class Repuestos
 	{
 		$bd 	= new DB;
 		
-		$sql 	= 	"	SELECT	r.id_repuesto, r.codigo_repuesto, r.descripcion_repuesto, r.precio_venta, r.stock
+		$sql 	= 	"	SELECT	r.id_repuesto, r.codigo_repuesto, r.descripcion_repuesto, r.precio_venta, r.precio_core, r.stock
 						FROM 	repuestos r
 					";
 					

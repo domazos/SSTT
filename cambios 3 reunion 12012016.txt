@@ -1,0 +1,73 @@
+1. Imprimir copia de contrato (formato igual al sistema actual) cuando se genera el contrato
+	<div id="zonaImprimir">
+	</div>
+	
+	$("#zonaImprimir").jqprint();
+
+2. Imprimir una salida o entrega cuando el cliente retira.
+3. Quitar del inicio los contratos "Entregados a Cliente" y mostrar en otra interfaz
+4. Quitar semaforo de cambios de estado [OK]
+5. Fecha Termino diagnostico, modificar texto por fecha limite de diagnostico. No se puede modificar por tecnico. [OK]
+6. Guardar diagnostico solo guarda no cambia estado, se cambia estado a vb cliente solo al guardar y enviar.
+7. Revisar descuadre en vista vb cliente (safari) [OK]
+8. Agregar boton cancelar en popup aceptar o rechazar presupuesto. [OK]
+9. Revisar loadingOff al cerrar popup vb cliente [OK]
+10. Al editar diagnostico sacar requerido de num gsx si no es garantia [OK]
+11. Se debe guardar los cambios del diagnostico al igual que los ppto nuevos al rechazar. [OK]
+12. Revisar estados luego de aceptar ppto (si es garantia o no, si hay repuestos, etc) [OK]
+13. Modulo pagar, revisar cuando existe más de un ppto
+14. OC discrimina cuando hay un repuesto asociado al ppto [OK]
+15. Mostrar core solo si tiene y si es superior a 100K [OK]
+16. Discriminar generar OC dependiendo de codigos ingresados (mano de obra no genera OC, repuestos si)
+17. Repuestos enviados por Jose se muestra precio independiente si es o no garantia
+
+
+oc solo si es reparacion
+fuera de garantia y con repuestos -> cliente paga repuestos y se compran a quintec
+fuera de garantia y MO no hay oc
+
+si es garantia no hay oc aunque haya repuestos
+garantia no tiene vb cliente pasa a espera repuesto [OK]
+no es garantia hay vb cliente -> aprueba ppto y paga -> se genera oc
+si rechaza ppto se puede cerrar por tecnico (cambiar estado) o generar nuevo ppto
+
+si hay core se resta core con el costo y al resultado se le suma el 30% (*0.70) y a eso el iva
+
+* Cómo se carga el stock de repuestos -> Excel no trae cantidades [Eliminar stock del sistema]
+* Qué pasa si el PPTO tiene repuestos con valores asociados y "repuestos" de mano de obra. ¿Se genera OC sólo con repuestos asociados? [SI]
+* ¿Se pueden generar diagnósticos sin ingresar repuestos? [SI]
+
+1. Ingreso Garantía -> Diagnóstico No Garantía -> PPTO Repuestos con y/o sin core 
+	- Se envía correo a cliente para VB y se informa PPTO con total normal y total core [OK]
+	- Cliente rechaza PPTO -> Contrato queda en estado "Rechazado por Cliente" -> Se activa opción de generar nuevo PPTO y opción de "Cerrar Contrato" (Se cambia estado a "Finalizado por Rechazo") [OK]
+	- Cliente aprueba PPTO -> Contrato queda en estado "Aprobado por Cliente" -> Se activa opción de "Pagar PPTO" -> Técnico ingresa N° Boleta de pago -> Contrato queda en estado "En Espera de Repuestos" [OK]
+	- Se genera OC y se envía a Valeria Diaz con copia a Jose Santelices [OK]
+	- Llegan los repuestos -> Administrador del Sistema recibe la OC en módulo Repuestos -> Se envía mail a técnico que llegaron los repuestos -> Técnico retoma el trabajo haciendo click en botón "Comenzar Reparación" (Esto sólo cambia el estado del contrato a "En proceso de Reparación" y registra cuando comenzó) -> Se envía correo a cliente informando el comienzo de la reparación. [OK, salvo enviar correo a cliente]
+	- Para finalizar el trabajo, el técnico hace click en botón "Finalizar Contrato" -> Se cambia el estado del contrato a "Finalizado" -> Se envía mail a cliente -> Se habilita botón "Retiro cliente" -> Se ingresa nombre y rut de quien retira -> Contrato queda en estado "Retirado por Cliente" y se saca del listado de trabajos del técnico.
+
+2. Ingreso Garantía -> Diagnóstico Si Garantía -> PPTO con o sin repuestos 
+	- No se envía correo a cliente con VB -> Contrato queda en estado "En espera de repuestos" [OK]
+	- No se genera OC [OK]
+	- Se habilita botón "Comenzar Reparación" (Esto sólo cambia el estado del contrato a "En proceso de Reparación" y registra cuando comenzó) -> Se envía correo a cliente informando el comienzo de la reparación. [OK]
+	- Para finalizar el trabajo, el técnico hace click en botón "Finalizar Contrato" -> Se cambia el estado del contrato a "Finalizado" -> Se envía mail a cliente -> Se habilita botón "Retiro cliente" -> Se ingresa nombre y rut de quien retira -> Contrato queda en estado "Retirado por Cliente" y se saca del listado de trabajos del técnico.
+	
+3. Ingreso Reparación -> Diagnóstico No Garantía -> PPTO con repuestos 
+	- Lo mismo que caso N° 1?
+	
+4. Ingreso Reparación -> Diagnóstico Si Garantía -> PPTO con repuestos
+	- ¿?
+
+	
+	
+1. Agregar número de contrato en ventana "VER" en barra superior [OK]
+2. Cerrar contrato -> Mostrar botón 
+3. Revisar paginador (desaparecen al avanzar pagina)
+4. Diagnóstico puede ser guardado sin agregar un repuesto al ppto [OK]
+5. Unitario agregamos el 30% ( / 0,7) [OK]
+6. En "Core" se debe mostrar el precio tal cual sale en planilla [OK]
+7. Revisar el total a pagar cuando acepta la rebaja [OK]
+8. Sacar botón Cargar Repuesto cuando es técnico. [OK]
+
+	
+	12119031
+	

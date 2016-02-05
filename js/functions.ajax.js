@@ -88,8 +88,8 @@ $(document).ready(function(){
 	
 	
 	$("table") 
-    .tablesorter({widthFixed: false, widgets: ['zebra', 'filter'], sortReset   : true,  sortRestart : true}) 
-    .tablesorterPager({container: $("#pager")});
+    .tablesorter({widthFixed: true, widgets: ['zebra', 'filter'], sortReset: false,  sortRestart: true}) 
+    .tablesorterPager({container: $("#pager"), savePages : false, pageReset: 0});
 	
 	
 	// Capturamos el evento "click" de los elementos con clase "boton_panel", para direccionar a la interfaz correspondiente
@@ -1327,7 +1327,7 @@ $(document).ready(function(){
 			
 			$('#estado_ppto_sel').attr("disabled", "disabled");
 			$('#estado_ppto_sel').selectmenu("refresh");
-			
+			$('#aplica_garantia').selectmenu('refresh');
 			
 			$.post('./include/detalle_contrato.php', {id_contrato : $(this).data('id_contrato')}, function(data)
 			{
@@ -1346,23 +1346,29 @@ $(document).ready(function(){
 					
 					
 					
-					if(data.id_diagnostico != "")
+					if((data.id_diagnostico != "") && (data.id_estado_cont != 4))
 					{
 						$('#diagnostico_contrato_frm #accion').val("guardar_diagnostico");
 						$('#diagnostico_contrato_frm #id_diagnostico').val(data.id_diagnostico);
 						
-						if(data.id_estado_cont == 4)
-							$('#diagnostico_contrato_frm #id_presupuesto').val(-1);
-						else
+						//if(data.id_estado_cont == 4)
+						//	$('#diagnostico_contrato_frm #id_presupuesto').val(-1);
+						//else
 							$('#diagnostico_contrato_frm #id_presupuesto').val(data.id_presupuesto);
 							
 							
 						$('#diagnostico_contrato_frm #id_cliente').val(data.id_cliente);
 						
 						if(data.garantia == 1)
+						{
 							$('#aplica_garantia').val("si_g");
+							$('#check_g').val(1);
+						}
 						else
+						{
 							$('#aplica_garantia').val("no_g");
+							$('#check_g').val(0);
+						}
 						
 						$('#aplica_garantia').selectmenu('refresh');
 						
@@ -1408,40 +1414,11 @@ $(document).ready(function(){
 						});
 						
 
-						/*if(data.id_estado_cont == 4)
-						{
-							
-							$('#aplica_garantia').selectmenu( "disable" );
-							$('#fecha_inicio_d').datepicker( "option", "disabled" );
-							$('#fecha_inicio_d').attr('readonly', 'readonly');
-							$('#fecha_termino_d').datepicker( "option", "disabled" );
-							$('#fecha_termino_d').attr('readonly', 'readonly');
-							$('#respuesta_tipo').selectmenu( "disable" );
-							$('#observacion_otra_respuesta').attr('readonly', 'readonly');
-							$('#num_gsx').attr('readonly', 'readonly');
-							$('#diagnostico_interno').attr('readonly', 'readonly');
-							$('#container_diag').css('display', 'none');
-							$('#filelist_diag').css('display', 'none');
-						}
-						else
-						{
-							$('#aplica_garantia').selectmenu( "enable" );
-							$('#fecha_inicio_d').datepicker( "option", "enable" );
-							$('#fecha_inicio_d').removeAttr('readonly');
-							$('#fecha_termino_d').datepicker( "option", "enable" );
-							$('#fecha_termino_d').removeAttr('readonly');
-							$('#respuesta_tipo').selectmenu( "enable" );
-							$('#observacion_otra_respuesta').removeAttr('readonly');
-							$('#num_gsx').removeAttr('readonly');
-							$('#diagnostico_interno').removeAttr('readonly');
-							$('#container_diag').css('display', 'block');
-							$('#filelist_diag').css('display', 'block');
-						}*/
 						
 						// PPTO
 						
-						if(data.id_estado_cont != 4)
-						{
+						//if(data.id_estado_cont != 4)
+						//{
 						
 							var parse_date_p = $.datepicker.parseDateTime("yy-mm-dd", "h:mm", data.fecha_ppto, null, {timeFormat:"h:mm"})
 							$('#fecha_ppto').datepicker("setDate", parse_date_p);
@@ -1472,6 +1449,8 @@ $(document).ready(function(){
 									$('#cant_repuesto_' + i).val(repuesto.cant_repuesto);
 									$('#unit_repuesto_limpio_' + i).val(repuesto.prec_repuesto);
 									$('#unit_repuesto_' + i).val(Moneda(String(repuesto.prec_repuesto)));
+									$('#core_repuesto_limpio_' + i).val(repuesto.core_repuesto);
+									$('#core_repuesto_' + i).val(Moneda(String(repuesto.core_repuesto)));
 									$('#total_repuesto_limpio_' + i).val(repuesto.total_repuesto);
 									$('#total_repuesto_' + i).val(Moneda(String(repuesto.total_repuesto)));
 																	
@@ -1482,6 +1461,11 @@ $(document).ready(function(){
 								$('#iva').val(Moneda(String(data.iva)));
 								$('#total_final').val(Moneda(String(data.total)));
 								$('#total_pagar').val(Moneda(String(data.total_pagar)));
+								
+								$('#sub_total_limpio').val(data.sub_total);
+								$('#iva_limpio').val(data.iva);
+								$('#total_final_limpio').val(data.total);
+								$('#total_pagar_limpio').val(data.total_pagar);
 							}
 							else
 							{
@@ -1492,22 +1476,17 @@ $(document).ready(function(){
 								$('#total_final').val(Moneda(String(0)));
 								$('#total_pagar').val(Moneda(String(0)));
 							}
-						}
-						else
-						{
-							
+						//}
+						//else
+						//{
+							//agregaRepuesto(1);
 						
-						
-							agregaRepuesto(1);
-						
-				
-							
 							// PPTO
 				
-							var currentDate = new Date();  
+							//var currentDate = new Date();  
 							
-							$("#fecha_ppto").datepicker("setDate", currentDate);
-						}
+							//$("#fecha_ppto").datepicker("setDate", currentDate);
+						//}
 						
 							
 						
@@ -1515,10 +1494,16 @@ $(document).ready(function(){
 					}
 					else
 					{
+						
 						$('#diagnostico_contrato_frm #accion').val("guardar_diagnostico");
 						$('#diagnostico_contrato_frm #id_diagnostico').val(0);
-						$('#diagnostico_contrato_frm #id_presupuesto').val(0);
 						$('#diagnostico_contrato_frm #id_cliente').val(data.id_cliente);
+						
+						if(data.id_estado_cont == 4)
+							$('#diagnostico_contrato_frm #id_presupuesto').val(-1);
+						else
+							$('#diagnostico_contrato_frm #id_presupuesto').val(0);
+							
 						
 						$('#listado_imagenes').fadeOut();
 						
@@ -1708,6 +1693,10 @@ $(document).ready(function(){
       },
 	  open: function( event, ui )
 	  {
+
+		  $("span.ui-dialog-title").text('Detalle Contrato N\xB0' + $(this).data('id_contrato')); 
+		  
+		  
 		  $( "#tabs" ).tabs({
 						  active: 0
 						});
@@ -1905,7 +1894,7 @@ $(document).ready(function(){
 					$('#tabs').tabs('enable', 3);
 					
 					
-					if(data.id_estado_cont == 7)
+					if((data.id_estado_cont == 7) || (data.id_estado_cont == 10))
 					{
 						$('#tabs').tabs('enable', 4);
 						//$('#observaciones_finales_ver').val(data.observacion_final);
@@ -1993,7 +1982,10 @@ $(document).ready(function(){
 					var i = 1;
 					
 					var cuantos_r = data.repuestos.length;
-	
+					var sub_total_core = 0;
+					var iva_core = 0;
+					var total_core = 0;
+					
 					if(cuantos_r > 0)
 					{	
 						
@@ -2005,15 +1997,34 @@ $(document).ready(function(){
 							$('#des_repuesto_' + i).val(repuesto.des_repuesto);
 							$('#cant_repuesto_' + i).val(repuesto.cant_repuesto);
 							$('#unit_repuesto_' + i).val(Moneda(String(repuesto.prec_repuesto)));
+							$('#core_repuesto_' + i).val(Moneda(String(repuesto.core_repuesto)));
 							$('#total_repuesto_' + i).val(Moneda(String(repuesto.total_repuesto)));
-															
+							$('#total_core_repuesto_' + i).val(Moneda(String(repuesto.total_core)));
+								
+								
+							if(repuesto.core_repuesto != 0)
+								sub_total_core += repuesto.total_core; 
+							else
+								sub_total_core += repuesto.total_core + repuesto.total_repuesto;
+													
 							i++;
 						});
 						
 						$('#sub_total_ver').val(Moneda(String(data.sub_total)));
+						$('#sub_total_core_ver').val(Moneda(String(sub_total_core)));
+						
 						$('#iva_ver').val(Moneda(String(data.iva)));
+						iva_core = parseInt(sub_total_core * 0.19);
+						$('#iva_core_ver').val(Moneda(String(iva_core)));
+						
+						
+						total_core = sub_total_core + iva_core;
+						
 						$('#total_final_ver').val(Moneda(String(data.total)));
+						$('#total_final_core_ver').val(Moneda(String(total_core)));
+						
 						$('#total_pagar_ver').val(Moneda(String(data.total_pagar)));
+						$('#total_pagar_core_ver').val(Moneda(String(total_core)));
 					}
 					else
 					{
@@ -2106,10 +2117,25 @@ $(document).ready(function(){
 		{
 			var id_presupuesto 	= data.id_presupuesto;
 			var total_pagar		= data.total_pagar;
+			var total_pagar_c	= data.total_pagar_c;
+			var rebaja_apple	= data.rebaja_apple;
 			
 			$('#id_contrato_pagar').val(data.id_contrato);
-			$('#total_contrato').val('$ ' + Moneda(String(total_pagar)));
-			$('#total_contrato_limpio').val(total_pagar);
+			
+			if(rebaja_apple == 0)
+			{
+			
+				$('#total_contrato').val('$ ' + Moneda(String(total_pagar)));
+				$('#total_contrato_limpio').val(total_pagar);
+			}
+			else
+			{
+				$('#total_contrato').val('$ ' + Moneda(String(total_pagar_c)));
+				$('#total_contrato_limpio').val(total_pagar_c);				
+			}
+			
+			
+			$('#id_presupuesto_pagar').val(id_presupuesto);
 			
 			if((data.boleta_ppto != "") && (data.boleta_ppto != 0))
 			{
@@ -2132,6 +2158,125 @@ $(document).ready(function(){
 	
 	
 	//////////////////////////////////////////////////////////////////
+	
+	
+	
+	//////////////////////////////////////////////////////////////////
+	// REPARAR PPTO													//
+	//////////////////////////////////////////////////////////////////
+	
+	
+	$('.reparar_contrato').on("click", function()
+	{
+		
+		var id = $(this).attr('id');	
+		
+		$.prompt("Al presionar 'SI' el contrato cambiar&aacute; de estado, se registrar&aacute; la fecha de inicio de la reparaci&oacute;n y se le informar&aacute; al cliente mediante correo electr&oacute;nico.<br><br>Est&aacute;s seguro que deseas comenzar a reparar este contrato?", { 
+									
+										buttons : { 'SI' : true, 'NO' : false },  
+									 
+										submit: function(e,v,m,f) 
+										{ 
+											
+											if(v)
+											{
+												
+												$.post('./include/reparar.php', {id_contrato: id}, function(data)
+												{
+													loading();
+													if(data == "OK")
+													{
+														loadingOff();
+														$.prompt('Se ha registrado con &eacute;xito el inicio de la reparaci&oacute;n', { submit: function(e,v,m,f) { actualiza(v, './gestion_contratos.php'); } });
+													}
+													else if((data == "CORREO") || (data == "ERR1") || (data == "ERR2"))
+													{
+														loadingOff();
+														$.prompt('Se ha registrado con &eacute;xito el inicio de la reparaci&oacute;n.<br>Sin embargo, no pudimos enviar el correo informativo al cliente.', { submit: function(e,v,m,f) { actualiza(v, './gestion_contratos.php'); } });
+													}
+													else
+													{
+														loadingOff();
+														$.prompt('Ha ocurrido un error al intentar registrar el inicio de la reparaci&oacute;n.<br>Favor intentar nuevamente.', { submit: function(e,v,m,f) { actualiza(v, './gestion_contratos.php'); } });
+													}
+				
+													
+												});
+											}
+											else
+												$.prompt.close();
+										}
+		});
+											
+		
+	});
+	
+	
+	
+	//////////////////////////////////////////////////////////////////
+	
+	
+	//////////////////////////////////////////////////////////////////
+	// CANCELAR PPTO													//
+	//////////////////////////////////////////////////////////////////
+	
+	$(".cancelar_contrato").on("click", function()
+	{
+		var id = $(this).attr('id');
+		dialog_cancelar_contrato.data('id_contrato', id).dialog( "open" );
+	});
+	
+	
+	
+	// Instanciamos el 'dialog' de jQuery UI definido en el formulario 'dialog-contrato-cancelar'
+	
+	dialog_cancelar_contrato = $( "#dialog-contrato-cancelar" ).dialog({
+      autoOpen: false,
+      height: 400,
+      width: 600,
+	  minWidth: 600,
+	  minHeight: 400,
+      modal: true,
+	  closeOnEscape: false,
+	  show: {
+        effect: "fade",
+        duration: 500
+      },
+      hide: {
+        effect: "fade",
+        duration: 500
+      },
+      buttons: {
+		  		'Guardar' : function() { $('#cancelar_contrato_btn').click(); },
+                'Cerrar': function() { $(this).dialog('close');}
+      },
+	  open: function( event, ui )
+	  {
+		$('#id_contrato_cancelar').val($(this).data('id_contrato'));
+		  
+		$('#respuesta_tipo_cancelar').selectmenu({
+														change: function( event, ui )
+														{
+															var id = $(this).val();
+															
+															if(id == 2)
+																$('#otra_respuesta_cancelar_tr').fadeIn();
+															else
+																$('#otra_respuesta_cancelar_tr').fadeOut();
+														}
+						});	
+				
+		
+		},
+      close: function() {
+		
+      }
+    });
+	
+	
+	//////////////////////////////////////////////////////////////////
+	
+	
 	
 	
 	
@@ -2321,7 +2466,8 @@ $(document).ready(function(){
 	$('#cargar_repuestos').on('click', function()
 	{
 		//var id = $(this).attr('id');
-		dialog_repuestos.dialog( "open" );
+		//dialog_repuestos.dialog( "open" );
+		window.location = './carga_repuestos.php';
 	});
 	
 	
@@ -2356,6 +2502,116 @@ $(document).ready(function(){
 		
       }
     });
+	
+	
+	$("#uploader").plupload({
+		// General settings
+		runtimes : 'html5,flash,silverlight,html4',
+		url : "/include/upload_repuestos.php",
+		
+		// Maximum file size
+        max_file_size : '15mb',
+		
+		
+		// Specify what files to browse for
+		filters : [
+			{title : "Excel files", extensions : "xls"}
+		],
+
+		// Rename files by clicking on their titles
+		rename: false,
+		
+		// Sort files
+		sortable: true,
+
+		// Enable ability to drag'n'drop files onto the widget (currently only HTML5 supports that)
+		dragdrop: true,
+
+		// Views to activate
+		views: {
+			list: true,
+			thumbs: true, // Show thumbs
+			active: 'thumbs'
+		},
+
+		// Flash settings
+		flash_swf_url : '/plupload/js/Moxie.swf',
+	
+		// Silverlight settings
+		silverlight_xap_url : '/plupload/js/Moxie.xap',
+		
+		init : {
+			
+			FilesAdded: function(up, files) {
+				if(up.files.length > 1)
+				{
+					$.prompt("Solo puedes cargar 1 archivo");
+
+					up.splice(1,up.files.length);
+				}
+			},
+			UploadFile: function() {
+				loading();
+			},
+			
+			FileUploaded: function(up, files, response) {
+                // Called when all files are either uploaded or failed
+				
+				
+				
+                var respuesta = response.response;
+
+				if(up.files.length > 0)
+				{
+					
+					if(respuesta == 'OK')
+					{
+						loadingOff();
+						
+						$('#siguiente_carga').click();
+						
+						$('#titulo_final').html('La informaci&oacute;n del archivo "' + files.name + '" fue cargada exitosamente en la Base de Datos');																		
+						$('#img_error').fadeOut();
+						$('#img_ok').fadeIn();
+						$('#anterior').fadeOut();
+						$('#finalizar_carga').fadeIn();
+						//$.prompt("La carga de repuestos ha finalizado con &eacute;xito.");	
+					}
+					else
+					{
+						loadingOff();
+						
+						$('#titulo_final').html('Ha ocurrido un error al intentar cargar el archivo "' + files.name + '". Int&eacute;ntelo nuevamente o cont&aacute;ctese con el administrador del sistema, para solicitar orientaci&oacute;n.');
+						$('#img_ok').fadeOut();		
+						$('#img_error').fadeIn();
+						$('#anterior').fadeIn();
+					}
+						//$.prompt("Ha ocurrido un error durante la carga de repuestos: <br><strong>" + respuesta + "</strong>");
+				}
+				else
+					$.prompt("Debe cargar al menos un archivo");
+				
+				
+				
+            }
+				
+		}
+		
+	});
+	
+	
+	
+	
+	$("#siguiente_carga").on("click", function()
+	{
+		//$('#file_upload').uploadifyUpload();
+	});
+	
+	$("#finalizar_carga").on("click", function()
+	{
+		actualiza(true, './gestion_repuestos.php');
+	});
+	
 	
 	/****************************************************************************************************************************/
 	
@@ -2434,106 +2690,6 @@ $(document).ready(function(){
 
 	/****************************************************************************************************************/
 	
-	$('#repuestos_upload').uploadify({
-									'uploader'  : './uploadify/uploadify.swf',
-									'script'    : './uploadify/uploadify.php',
-									'cancelImg' : './uploadify/cancel.png',
-									'folder'    : './uploads',
-									'fileExt'   : '*.xls',
-									'fileDesc'  : 'Archivos Excel',
-									'auto'      : false,
-									'buttonImg' : './uploadify/button.png',
-									'height'    : 27,
-									'width'		: 135,
-									'method'	: 'post',
-									'onSelect' : function(file) {
-																	//$.prompt('El archivo fue agregado a la fila de espera.');
-																	$('#siguiente_carga').removeAttr('disabled');
-																	$('#siguiente_carga').fadeIn();
-																	
-																},
-									'onComplete' : 	function(event, ID, fileObj, response, data) 
-													{
-														$.post("./include/creaDirectorio.php", { file:  fileObj.name }, function(data) 
-														{
-															//$('#loading').css("display", "block");
-															loading();
-															var resp = data.split("|");
-															
-															
-															if(resp[0] == "OK")
-															{
-																$.post("./include/subelo.php", { file: fileObj.name, path: fileObj.filePath, fecha: resp[1] }, function(data) 
-																{
-																	if(data == 99)
-																	{
-																		//$('#loading').css("display", "none");
-																		loadingOff();
-																   		//$.prompt('El archivo "' + fileObj.name + '" no cumple con el formato requerido.', { submit: function(e,v,m,f) { actualiza(v, './cargar_inventario.php'); } });	
-																		$('#titulo_final').html('El archivo "' + fileObj.name + '" no cumple con el formato requerido.');		
-																		$('#img_ok').fadeOut();
-																		$('#img_error').fadeIn();
-																		
-																		$('#anterior').fadeIn();
-																		
-																	}
-																	else if(data == "ERROR")
-																	{
-																		//$('#loading').css("display", "none");
-																		loadingOff();
-																   		//$.prompt('Ha ocurrido un error al intentar cargar el archivo "' + fileObj.name + '". Int&eacute;ntelo nuevamente o cont&aacute;ctese con el administrador del sistema, para solicitar orientaci&oacute;n.', { submit: function(e,v,m,f) { actualiza(v, './cargar_inventario.php'); } });	
-																		
-																		$('#titulo_final').html('Ha ocurrido un error al intentar cargar el archivo "' + fileObj.name + '". Int&eacute;ntelo nuevamente o cont&aacute;ctese con el administrador del sistema, para solicitar orientaci&oacute;n.');
-																		$('#img_ok').fadeOut();		
-																		$('#img_error').fadeIn();
-																		$('#anterior').fadeIn();
-																		
-																	}
-																	else if(data == "OK")
-																	{
-																   		//$('#loading').css("display", "none");
-																		loadingOff();
-																   		//$.prompt('La informaci&oacute;n del archivo "' + fileObj.name + '" fue cargada exitosamente en la Base de Datos.');
-																		$('#titulo_final').html('La informaci&oacute;n del archivo "' + fileObj.name + '" fue cargada exitosamente en la Base de Datos');																		
-																		$('#img_error').fadeOut();
-																		$('#img_ok').fadeIn();
-																		$('#anterior').fadeOut();
-																		$('#finalizar_carga').fadeIn();
-																		
-																	}
-																	else
-																	{
-																		//$('#loading').css("display", "none");
-																		loadingOff();
-																   		//$.prompt('Ha ocurrido un error al intentar cargar el archivo "' + fileObj.name + '". Int&eacute;ntelo nuevamente o cont&aacute;ctese con el administrador del sistema, para solicitar orientaci&oacute;n.', { submit: function(e,v,m,f) { actualiza(v, './cargar_inventario.php'); } });	
-																		
-																		$('#titulo_final').html('Ha ocurrido un error al intentar cargar el archivo "' + fileObj.name + '". Int&eacute;ntelo nuevamente o cont&aacute;ctese con el administrador del sistema, para solicitar orientaci&oacute;n.');
-																		$('#img_ok').fadeOut();		
-																		$('#img_error').fadeIn();
-																		$('#anterior').fadeIn();
-																		
-																	}
-																 });	
-																 
-															}
-														});
-													}
-                  				});
-	
-	
-	$("#siguiente_carga").on("click", function()
-	{
-		$('#repuestos_upload').uploadifyUpload();
-	});
-	
-	$("#finalizar_carga").on("click", function()
-	{
-		actualiza(true, './');
-	});
-	
-	
-	
-	
 	//////////////////////////////////////////////////////////////////
 	
 	
@@ -2571,7 +2727,7 @@ $(document).ready(function(){
 	
 	
 	// Tooltip; deshabilitar animaciones por ahora y habilitar el "track" de los tooltip a través del input correspondiente
-	$("#nuevo_usuario_frm, #editar_usuario_frm, #pass_usuario_frm, #nuevo_cliente_frm, #editar_cliente_frm, #nuevo_contrato_frm, #diagnostico_contrato_frm, #pagar_contrato_frm, #estado_contrato_frm, #finalizar_contrato_frm, #finalizar_oc_frm").tooltip({
+	$("#nuevo_usuario_frm, #editar_usuario_frm, #pass_usuario_frm, #nuevo_cliente_frm, #editar_cliente_frm, #nuevo_contrato_frm, #diagnostico_contrato_frm, #pagar_contrato_frm, #estado_contrato_frm, #finalizar_contrato_frm, #finalizar_oc_frm, #cancelar_contrato_frm").tooltip({
 		show: false,
 		hide: false,
 		track: true
@@ -3087,7 +3243,7 @@ $(document).ready(function(){
 						maxlength: 50
 			},											
 													
-			cod_repuesto_1: 'required'
+			//cod_repuesto_1: 'required'
 			
 		},
 		messages: {
@@ -3100,7 +3256,7 @@ $(document).ready(function(){
 			fecha_ppto: 'Seleccione una fecha v\u00e1lida',
 			//estado_ppto: 'Seleccione un estado',
 			num_gsx: 'Ingrese n\u00famero GSX v\u00e1lido',
-			cod_repuesto_1: 'Debe ingresar al menos un repuesto',
+			//cod_repuesto_1: 'Debe ingresar al menos un repuesto',
 			observacion_otra_respuesta: 'Debe ingresar un detalle para la respuesta'
 		},
 		
@@ -3118,7 +3274,7 @@ $(document).ready(function(){
 				var error_temp		= data.split(" -> ");
 				var error_smpt		= error_temp[0];
 				
-				if((mensaje == "OK") || (mensaje == "CORREO") || (mensaje == "ENVCORREO"))
+				if((mensaje == "OK") || (mensaje == "CORREO") || (mensaje == "ENVCORREO") || (mensaje == "CORREOGAR"))
 				{
 					if (uploader.files.length > 0)
 					{ 
@@ -3146,6 +3302,10 @@ $(document).ready(function(){
 									$.prompt('El diagn&oacute;stico ha sido guardado con &eacute;xito.<br>Recuerda que no lo enviaste al cliente en esta oportunidad.', { submit: function(e,v,m,f) { actualiza(v, './gestion_contratos.php'); } });	
 								else if(error_smpt == "SMTP")
 									$.prompt('El contrato ha sido creado con &eacute;xito, pero ha ocurrido un error al enviar el correo al t&eacute;cnico asignado y al cliente.', { submit: function(e,v,m,f) { actualiza(v, './gestion_contratos.php'); } });
+								else if(mensaje == "CORREOGAR")
+									$.prompt('El diagn&oacute;stico ha sido guardado con &eacute;xito.<br>Recuerda que como aplica garant&iacute;a, no se env&iacute;a mail a cliente.', { submit: function(e,v,m,f) { actualiza(v, './gestion_contratos.php'); } });		
+									
+									
 							}
 							else
 								$.prompt('Ha ocurrido un error al guardar las im&aacute;genes del diagn&oacute;stico. Sin embargo la informaci&oacute;n del diagn&oacute;stico fue guardada con &eacute;xito', { submit: function(e,v,m,f) { actualiza(v, './gestion_contratos.php'); } });	
@@ -3164,7 +3324,9 @@ $(document).ready(function(){
 						else if(mensaje == "ENVCORREO")
 									$.prompt('El diagn&oacute;stico ha sido guardado con &eacute;xito.<br>Recuerda que no lo enviaste al cliente en esta oportunidad.', { submit: function(e,v,m,f) { actualiza(v, './gestion_contratos.php'); } });
 						else if(error_smpt == "SMTP")
-									$.prompt('El diagn&oacute;stico ha sido creado con &eacute;xito, pero ha ocurrido un error al enviar el correo al t&eacute;cnico asignado y al cliente.', { submit: function(e,v,m,f) { actualiza(v, './gestion_contratos.php'); } });		
+									$.prompt('El diagn&oacute;stico ha sido creado con &eacute;xito, pero ha ocurrido un error al enviar el correo al t&eacute;cnico asignado y al cliente.', { submit: function(e,v,m,f) { actualiza(v, './gestion_contratos.php'); } });	
+						else if(mensaje == "CORREOGAR")
+									$.prompt('El diagn&oacute;stico ha sido guardado con &eacute;xito.<br>Recuerda que como aplica garant&iacute;a, no se env&iacute;a mail a cliente.', { submit: function(e,v,m,f) { actualiza(v, './gestion_contratos.php'); } });		
 					}
 				}
 				else
@@ -3280,6 +3442,40 @@ $(document).ready(function(){
 				else
 				{
 					$.prompt('Ha ocurrido un error al intentar finalizar el contrato.<br>Favor intentar nuevamente.', { submit: function(e,v,m,f) { actualiza(v, './gestion_contratos.php'); } });	
+				}
+				
+			});
+			
+		}
+	});
+	
+	// Reglas de validación para el formulario "Cancelar Contrato"
+	$("#cancelar_contrato_frm").validate({
+		//onsubmit: false,
+		rules: {
+			observaciones_finales: { required: true, maxlength: 250 }
+			
+		},
+		messages: {
+			observaciones_finales: 'Debe ingresar una observacion final'
+		},
+		
+		submitHandler: function(form) {
+			// do other things for a valid form
+			loading();
+			$.post('./include/cancelar_contrato.php', $('#cancelar_contrato_frm').serialize(), function(data)
+			{
+				var mensaje 		= data;
+				
+				loadingOff();
+					
+				if(mensaje == "OK")
+				{
+					$.prompt('El contrato ha sido cancelado con &eacute;xito', { submit: function(e,v,m,f) { actualiza(v, './gestion_contratos.php'); } });
+				}
+				else
+				{
+					$.prompt('Ha ocurrido un error al intentar cancelar el contrato.<br>Favor intentar nuevamente.', { submit: function(e,v,m,f) { actualiza(v, './gestion_contratos.php'); } });	
 				}
 				
 			});
@@ -3460,7 +3656,8 @@ $(document).ready(function(){
 		var elimina = '';
 		
 		if(i == 1)
-			req_codigo = 'required';
+			//req_codigo = 'required';
+			req_codigo = '';
 		//else
 		//	elimina = '<a href="#" id="elimina_rep_' + i + '" class="elimina_repuesto" onclick="eliminaRepuesto(' + i + ');"><img src="./images/delete.png" width="10" height="10"></a>';
 		
@@ -3472,14 +3669,22 @@ $(document).ready(function(){
 								<input type="hidden" name="tipo_repuesto_' + i + '" id="tipo_repuesto_' + i + '" value="1" /> \
                             </td> \
                             <td align="center"><input type="text" name="des_repuesto_' + i + '" id="des_repuesto_' + i + '" value="" readonly="readonly" /></td> \
-                            <td align="center"><input type="text" name="cant_repuesto_' + i + '" id="cant_repuesto_' + i + '" class="cantidad" value="1" style="width:80px; text-align:center;" /></td> \
+                            <td align="center"><input type="text" name="cant_repuesto_' + i + '" id="cant_repuesto_' + i + '" class="cantidad" value="1" style="width:60px; text-align:center;" /></td> \
                             <td align="center"> \
                             	<input type="text" name="unit_repuesto_' + i + '" id="unit_repuesto_' + i + '" value="" style="width:80px; text-align:right;" readonly="readonly" /> \
                                 <input type="hidden" name="unit_repuesto_limpio_' + i + '" id="unit_repuesto_limpio_' + i + '" value="" style="width:80px; text-align:right;" /> \
                             </td> \
+							<td align="center"> \
+                            	<input type="text" name="core_repuesto_' + i + '" id="core_repuesto_' + i + '" value="" style="width:80px; text-align:right;" readonly="readonly" /> \
+                                <input type="hidden" name="core_repuesto_limpio_' + i + '" id="core_repuesto_limpio_' + i + '" value="" style="width:80px; text-align:right;" /> \
+                            </td> \
                             <td align="center"> \
                             	<input type="text" name="total_repuesto_' + i + '" id="total_repuesto_' + i + '" value="" style="width:80px; text-align:right;" readonly="readonly" /> \
                             	<input type="hidden" name="total_repuesto_limpio_' + i + '" id="total_repuesto_limpio_' + i + '" value="" style="width:80px; text-align:right;" /> \
+                            </td> \
+							<td align="center"> \
+                            	<input type="text" name="total_core_repuesto_' + i + '" id="total_core_repuesto_' + i + '" value="" style="width:80px; text-align:right;" readonly="readonly" /> \
+                            	<input type="hidden" name="total_core_repuesto_limpio_' + i + '" id="total_core_repuesto_limpio_' + i + '" value="" style="width:80px; text-align:right;" /> \
                             </td> \
 							<td>' + elimina + '</td> \
                         </tr>';	
@@ -3511,8 +3716,20 @@ $(document).ready(function(){
 													
 								$('#cod_repuesto_' + i).val(data.codigo_repuesto);
 								$('#des_repuesto_' + i).val(data.descripcion_repuesto);
-								$('#unit_repuesto_' + i).val(Moneda(data.precio_repuesto));
+								$('#unit_repuesto_' + i).val(Moneda(String(data.precio_repuesto)));
 								$('#unit_repuesto_limpio_' + i).val(data.precio_repuesto);
+								
+								var core_repuesto;
+								
+								if(data.core_repuesto == "NO")
+									core_repuesto = 0;
+								else
+									core_repuesto = data.core_repuesto_lista;
+								
+
+								
+								$('#core_repuesto_' + i).val(Moneda(String(core_repuesto)));
+								$('#core_repuesto_limpio_' + i).val(core_repuesto);
 								
 								var cantidad 		= parseInt($('#cant_repuesto_' + i).val());
 								var precio_repuesto	= parseInt(data.precio_repuesto);
@@ -3521,8 +3738,8 @@ $(document).ready(function(){
 								
 								calculaTotales();
 								
-								$('#total_repuesto_' + i).val(Moneda(String(total_repuesto)));
-								$('#total_repuesto_limpio_' + i).val(total_repuesto);
+								//$('#total_repuesto_' + i).val(Moneda(String(total_repuesto)));
+								//$('#total_repuesto_limpio_' + i).val(total_repuesto);
 								
 								
 							}
@@ -3584,8 +3801,9 @@ $(document).ready(function(){
 			
 					var next_id = parseInt(id) + 1;
 					
+					calculaTotales();
 					
-					$.post('./include/verifica_stock.php', {cantidad : $('#cant_repuesto_' + id).val(), codigo : $('#cod_repuesto_' + id).val() }, function(data)
+					/*$.post('./include/verifica_stock.php', {cantidad : $('#cant_repuesto_' + id).val(), codigo : $('#cod_repuesto_' + id).val() }, function(data)
 					{
 						if(data == "OK")
 						{
@@ -3648,7 +3866,7 @@ $(document).ready(function(){
 									} 
 								});	
 						}
-					});
+					});*/
 				
 			}
 					  
@@ -3675,7 +3893,7 @@ $(document).ready(function(){
 		var req_codigo = '';
 		
 		if(i == 1)
-			req_codigo = 'required';
+			req_codigo = '';
 		
 		var html 	= '<tr id="tr_' + i + '"> \
                         	<td align="center"> \
@@ -3683,14 +3901,22 @@ $(document).ready(function(){
                             	<input type="text" name="cod_repuesto_' + i + '" id="cod_repuesto_' + i + '" class="repuesto" value=""  readonly="readonly" ' + req_codigo + ' /> \
                             </td> \
                             <td align="center"><input type="text" name="des_repuesto_' + i + '" id="des_repuesto_' + i + '" value="" readonly="readonly" /></td> \
-                            <td align="center"><input type="text" name="cant_repuesto_' + i + '" id="cant_repuesto_' + i + '" class="cantidad" value="1" readonly="readonly" style="width:80px; text-align:center;" /></td> \
+                            <td align="center"><input type="text" name="cant_repuesto_' + i + '" id="cant_repuesto_' + i + '" class="cantidad" value="1" readonly="readonly" style="width:60px; text-align:center;" /></td> \
                             <td align="center"> \
                             	<input type="text" name="unit_repuesto_' + i + '" id="unit_repuesto_' + i + '" value="" style="width:80px; text-align:right;" readonly="readonly" /> \
                                 <input type="hidden" name="unit_repuesto_limpio_' + i + '" id="unit_repuesto_limpio_' + i + '" value="" style="width:80px; text-align:right;" /> \
                             </td> \
+							<td align="center"> \
+                            	<input type="text" name="core_repuesto_' + i + '" id="core_repuesto_' + i + '" value="" style="width:80px; text-align:right;" readonly="readonly" /> \
+                                <input type="hidden" name="core_repuesto_limpio_' + i + '" id="core_repuesto_limpio_' + i + '" value="" style="width:80px; text-align:right;" /> \
+                            </td> \
                             <td align="center"> \
                             	<input type="text" name="total_repuesto_' + i + '" id="total_repuesto_' + i + '" value="" style="width:80px; text-align:right;" readonly="readonly" /> \
                             	<input type="hidden" name="total_repuesto_limpio_' + i + '" id="total_repuesto_limpio_' + i + '" value="" style="width:80px; text-align:right;" /> \
+                            </td> \
+							<td align="center"> \
+                            	<input type="text" name="total_core_repuesto_' + i + '" id="total_core_repuesto_' + i + '" value="" style="width:80px; text-align:right;" readonly="readonly" /> \
+                            	<input type="hidden" name="total_core_repuesto_limpio_' + i + '" id="total_core_repuesto_limpio_' + i + '" value="" style="width:80px; text-align:right;" /> \
                             </td> \
                         </tr>';	
 						
@@ -3704,8 +3930,12 @@ $(document).ready(function(){
 		var cantidad;
 		var precio_unitario;
 		var total_repuesto;
+		var precio_core;
+		var total_repuesto_core;
+		
 		
 		var total_ppto = 0;
+		var total_ppto_core = 0;
 		var total_prod;
 
 		var cuantos = $('#cant_filas').val();
@@ -3734,26 +3964,115 @@ $(document).ready(function(){
 				
 				
 			}
+			
+			// TOTAL CORE
+			
+			if($('#core_repuesto_limpio_' + i).val() != 0)
+			{
+			
+				cantidad		= parseInt($('#cant_repuesto_' + i).val());	
+				precio_core		= parseInt($('#core_repuesto_limpio_' + i).val());
+				precio_normal	= parseInt($('#unit_repuesto_limpio_' + i).val());
+				
+				
+				// Precio total por cada repuesto ingresado
+				total_repuesto_core	= parseInt((((precio_normal * 0.7) - precio_core) / 0.7) * cantidad);
+			
+				$('#total_core_repuesto_' + i).val(Moneda(String(total_repuesto_core)));
+				$('#total_core_repuesto_limpio_' + i).val(total_repuesto_core);
+
+				if(($('#tipo_repuesto_' + i).val() == 1) && ($('#check_g').val() == 1))
+					total_ppto_core		+= total_repuesto_core;
+				else if(($('#tipo_repuesto_' + i).val() == 0) && ($('#check_g').val() == 1))
+					total_ppto_core		+= 0;
+				else 
+					total_ppto_core		+= total_repuesto_core;
+					
+				
+				
+			}
+			else
+			{
+				$('#total_core_repuesto_' + i).val(Moneda("0"));
+				$('#total_core_repuesto_limpio_' + i).val(0);	
+				
+				total_repuesto_core = 0;
+				
+				total_ppto_core		+= total_repuesto_core + total_repuesto;
+				
+			}
 					
 			
 		}
 		
 		
+		// OPCION 1: SE ASUME QUE LOS PRODUCTOS VIENEN CON IVA Y NO SE VUELVE A CALCULAR
 		
-		var neto_ppto	= parseInt(total_ppto / 1.19);
+		/*
+		var neto_ppto		= parseInt(total_ppto / 1.19);
+		var neto_ppto_core	= parseInt(total_ppto_core / 1.19);
 		
-		var iva_ppto	= parseInt(total_ppto) - parseInt(neto_ppto);
+		var iva_ppto		= parseInt(total_ppto) - parseInt(neto_ppto);
+		var iva_ppto_core	= parseInt(total_ppto_core) - parseInt(neto_ppto_core);
 		
 		
 		
 		$('#total_final').val(Moneda(String(total_ppto)));
 		$('#total_final_limpio').val(total_ppto);
 		
+		$('#total_core_final').val(Moneda(String(total_ppto_core)));
+		$('#total_core_final_limpio').val(total_ppto_core);
+		
+		$('#total_pagar').val(Moneda(String(total_ppto)));
+		$('#total_pagar_limpio').val(total_ppto);
+		
+		$('#total_core_pagar').val(Moneda(String(total_ppto_core)));
+		$('#total_core_pagar_limpio').val(total_ppto_core);
+		
+		*/
+		
+		///////////////////////////////////////////////////////////////////////////////////////////////
+		
+		
+		// OPCION 2: SE ASUME QUE LOS PRODUCTOS VIENEN SIN IVA Y SE CALCULA 
+		
+		var neto_ppto		= parseInt(total_ppto);
+		var neto_ppto_core	= parseInt(total_ppto_core);
+
+		var iva_ppto		= parseInt(neto_ppto * 0.19);
+		var iva_ppto_core	= parseInt(neto_ppto_core * 0.19);
+		
+		var total_ppto_final 		= total_ppto + iva_ppto;
+		var total_ppto_core_final 	= total_ppto_core + iva_ppto_core;
+		
+		$('#total_final').val(Moneda(String(total_ppto_final)));
+		$('#total_final_limpio').val(total_ppto_final);
+		
+		$('#total_core_final').val(Moneda(String(total_ppto_core_final)));
+		$('#total_core_final_limpio').val(total_ppto_core_final);
+		
+		
+		$('#total_pagar').val(Moneda(String(total_ppto_final)));
+		$('#total_pagar_limpio').val(total_ppto_final);
+		
+		$('#total_core_pagar').val(Moneda(String(total_ppto_core_final)));
+		$('#total_core_pagar_limpio').val(total_ppto_core_final);
+		
+		///////////////////////////////////////////////////////////////////////////////////////////////
+		
+		
 		$('#sub_total').val(Moneda(String(neto_ppto)));
 		$('#sub_total_limpio').val(neto_ppto);
+		
+		$('#sub_total_core').val(Moneda(String(neto_ppto_core)));
+		$('#sub_total_core_limpio').val(neto_ppto_core);
 				
 		$('#iva').val(Moneda(String(iva_ppto)));
 		$('#iva_limpio').val(iva_ppto);	
+		
+		$('#iva_core').val(Moneda(String(iva_ppto_core)));
+		$('#iva_core_limpio').val(iva_ppto_core);	
+		
 		
 		/*if($('#check_g').val() == 1)
 		{
@@ -3762,8 +4081,7 @@ $(document).ready(function(){
 		}
 		else
 		{*/
-			$('#total_pagar').val(Moneda(String(total_ppto)));
-			$('#total_pagar_limpio').val(total_ppto);
+			
 		
 		//}
 		
@@ -3783,6 +4101,8 @@ $(document).ready(function(){
 			$('#cant_repuesto_' + id).val('');
 			$('#unit_repuesto_' + id).val('');
 			$('#unit_repuesto_limpio_' + id).val(0);
+			$('#core_repuesto_' + id).val('');
+			$('#core_repuesto_limpio_' + id).val(0);
 			$('#total_repuesto_' + id).val('');
 			$('#total_repuesto_limpio_' + id).val(0);
 			
@@ -3829,6 +4149,7 @@ $(document).ready(function(){
 		$('#cant_repuesto_' + id).val(1);
 		$('#unit_repuesto_' + id).val('');
 		$('#unit_repuesto_limpio_' + id).val('');
+		$('#core_repuesto_limpio_' + id).val('');
 		$('#total_repuesto_' + id).val('');
 		$('#total_repuesto_limpio_' + id).val('');
 		

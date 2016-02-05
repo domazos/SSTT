@@ -61,7 +61,21 @@ if($id_cliente != 0)
 		
 		
 		if($contrato->enviarCorreo($para, $cc = NULL, $nombre_desde, $asunto_c, $cuerpo_c, $adjunto = NULL))
-			$correo 	= "OK";
+		{
+			$sql_cont	=	"UPDATE contratos_reparacion SET id_estado = 2 WHERE id_contrato = ".$id_contrato;
+			if($bd->query($sql_cont))
+			{
+				$correo 	= "OK";
+				
+				session_name('sstt');
+				session_start();
+				extract($_SESSION);
+									
+				$contrato->seguimientoContrato($id_contrato, $userid, 2);
+			}
+			else
+				echo "ERROR_ENV";
+		}
 		else
 			$correo		= "NO1";
 	}

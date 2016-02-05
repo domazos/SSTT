@@ -140,6 +140,8 @@ if(isset($cant_filas) and !empty($cant_filas))
 			$campo_cod 		= "cod_repuesto_".$i;
 			$campo_prec		= "unit_repuesto_limpio_".$i;
 			$campo_total	= "total_repuesto_limpio_".$i;
+			$campo_core		= "core_repuesto_limpio_".$i;
+			
 			
 			$repuestos[]	= array(
 														"id"				=> $_POST[$campo_id_p],
@@ -149,7 +151,8 @@ if(isset($cant_filas) and !empty($cant_filas))
 														"des_repuesto"		=> $_POST[$campo_des],
 														"cant_repuesto"		=> $_POST[$campo_cant],
 														"prec_repuesto"		=> $_POST[$campo_prec],
-														"total_repuesto"	=> $_POST[$campo_total]
+														"total_repuesto"	=> $_POST[$campo_total],
+														"core_repuesto"		=> $_POST[$campo_core]
 													);
 		}
 	}
@@ -163,7 +166,7 @@ switch ($accion)
 						
 									break;
 						
-	case "guardar_diagnostico"	:	$guarda_diagnostico = $contrato->guardaDiagnostico($accion, $id_contrato, $aplica_garantia, $fecha_inicio_d, $fecha_termino_d, $respuesta_tipo, $observacion_otra_respuesta, $diagnostico_cliente, $diagnostico_interno, $num_gsx, $fecha_ppto, $estado_ppto, $observaciones_ppto, $repuestos, $sub_total_limpio, $iva_limpio, $total_final_limpio, $total_pagar_limpio, 0, 0, $id_cliente, $tipo_guardar);
+	case "guardar_diagnostico"	:	$guarda_diagnostico = $contrato->guardaDiagnostico($accion, $id_contrato, $aplica_garantia, $fecha_inicio_d, $fecha_termino_d, $respuesta_tipo, $observacion_otra_respuesta, $diagnostico_cliente, $diagnostico_interno, $num_gsx, $fecha_ppto, $estado_ppto, $observaciones_ppto, $repuestos, $sub_total_limpio, $iva_limpio, $total_final_limpio, $total_pagar_limpio, 0, 0, $id_cliente, $tipo_guardar, $sub_total_core_limpio, $iva_core_limpio, $total_core_final_limpio, $total_core_pagar_limpio);
 									
 									echo $guarda_diagnostico;	
 									

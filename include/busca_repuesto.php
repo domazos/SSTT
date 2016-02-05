@@ -19,9 +19,9 @@ if ($cuantos > 0)
 	{
 		$row = $bd->fetchObj(); //loop through the retrieved values
 		{
-			$a_json_row['value'] 	= htmlentities(stripslashes($row->descripcion_repuesto));
+			$a_json_row['value'] 	= stripslashes($row->descripcion_repuesto);
 			$a_json_row['id']		= htmlentities(stripslashes($row->id_repuesto));
-			$a_json_row['label']	= htmlentities(stripslashes($row->codigo_repuesto." - ".$row->descripcion_repuesto));
+			$a_json_row['label']	= stripslashes($row->codigo_repuesto." - ".$row->descripcion_repuesto);
 			array_push($a_json, $a_json_row);
 		}
 	}
